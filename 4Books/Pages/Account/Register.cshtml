@@ -1,0 +1,417 @@
+﻿@page
+@model _4Books.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Registrazione";
+}
+
+<div class="auth-page register-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-75">
+            <div class="col-lg-10">
+                <div class="auth-card card border-0 shadow-lg overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-lg-5 d-none d-lg-block auth-bg-col">
+                            <div class="auth-illustration h-100 d-flex flex-column justify-content-between p-5">
+                                <div class="auth-logo text-white mb-5 fade-in">
+                                    <h1><i class="bi bi-book"></i> 4Books</h1>
+                                    <p class="lead">Il tuo universo di libri a portata di click</p>
+                                </div>
+                                <div class="auth-features text-white slide-up delay-1">
+                                    <h5>Con 4Books potrai:</h5>
+                                    <ul class="feature-list">
+                                        <li><i class="bi bi-check-circle"></i> Trovare migliaia di libri</li>
+                                        <li><i class="bi bi-check-circle"></i> Salvare i tuoi preferiti</li>
+                                        <li><i class="bi bi-check-circle"></i> Scoprire nuovi autori</li>
+                                        <li><i class="bi bi-check-circle"></i> Organizzare le tue letture</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7 auth-form-col">
+                            <div class="card-body p-4 p-lg-5">
+                                <div class="d-block d-lg-none text-center mb-4">
+                                    <h2 class="h1 text-gradient"><i class="bi bi-book me-2"></i>4Books</h2>
+                                </div>
+
+                                <div class="text-center mb-4 fade-in">
+                                    <h2 class="mb-1">Crea un account</h2>
+                                    <p class="text-muted">Unisciti alla nostra community di lettori</p>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.Message))
+                                {
+                                    <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi @(Model.IsSuccess ? "bi-check-circle-fill" : "bi-exclamation-circle-fill") me-2"></i>
+                                            <div>@Model.Message</div>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+
+                                    @if (Model.IsSuccess)
+                                    {
+                                        <div class="d-grid mt-4 slide-up">
+                                            <a asp-page="/Account/Login" class="btn btn-primary btn-lg">
+                                                <i class="bi bi-box-arrow-in-right me-2"></i>Vai al login
+                                            </a>
+                                        </div>
+                                    }
+                                }
+
+                                @if (!Model.IsSuccess)
+                                {
+                                    <form method="post" class="slide-up needs-validation">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-floating">
+                                                    <input asp-for="Input.FirstName" class="form-control" placeholder="Nome" required />
+                                                    <label asp-for="Input.FirstName">
+                                                        <i class="bi bi-person me-2 text-muted"></i>Nome
+                                                    </label>
+                                                    <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating">
+                                                    <input asp-for="Input.LastName" class="form-control" placeholder="Cognome" required />
+                                                    <label asp-for="Input.LastName">
+                                                        <i class="bi bi-person me-2 text-muted"></i>Cognome
+                                                    </label>
+                                                    <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-floating">
+                                                    <input asp-for="Input.Email" class="form-control" placeholder="Email" required />
+                                                    <label asp-for="Input.Email">
+                                                        <i class="bi bi-envelope me-2 text-muted"></i>Email
+                                                    </label>
+                                                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-floating password-container">
+                                                    <input asp-for="Input.Password" class="form-control" id="password" placeholder="Password" required />
+                                                    <label asp-for="Input.Password">
+                                                        <i class="bi bi-lock me-2 text-muted"></i>Password
+                                                    </label>
+                                                    <span class="password-toggle">
+                                                        <i class="bi bi-eye" id="togglePassword"></i>
+                                                    </span>
+                                                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                                                </div>
+                                                <div class="password-strength mt-2 mb-3" id="passwordStrength">
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mt-1">
+                                                        <span class="badge rounded-pill text-muted small">Debole</span>
+                                                        <span class="badge rounded-pill text-muted small">Media</span>
+                                                        <span class="badge rounded-pill text-muted small">Forte</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-floating">
+                                                    <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Conferma Password" required />
+                                                    <label asp-for="Input.ConfirmPassword">
+                                                        <i class="bi bi-lock-fill me-2 text-muted"></i>Conferma Password
+                                                    </label>
+                                                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mt-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="terms" required>
+                                                    <label class="form-check-label small" for="terms">
+                                                        Accetto i <a href="#" class="text-decoration-none">Termini di Servizio</a> e la <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mt-3">
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary btn-lg">
+                                                        <i class="bi bi-person-plus me-2"></i>Registrati
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                }
+
+                                <div class="text-center mt-4 slide-up delay-1">
+                                    <p class="mb-0">Hai già un account?</p>
+                                    <a asp-page="/Account/Login" class="btn btn-link fw-bold text-decoration-none">
+                                        Accedi <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Stili per la pagina di autenticazione */
+    .auth-page {
+        background-color: var(--light-bg);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 3rem 0;
+    }
+
+    .min-vh-75 {
+        min-height: 75vh;
+    }
+
+    .auth-card {
+        border-radius: 20px;
+    }
+
+    /* Colonna di sfondo */
+    .auth-bg-col {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-bg-col::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,.1)' fill-rule='evenodd'/%3E%3C/svg%3E");
+        opacity: 0.4;
+        z-index: 0;
+    }
+
+    .auth-logo, .auth-features {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Stili per le feature lista */
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .feature-list li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .feature-list li i {
+        margin-right: 10px;
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Stili form */
+    .auth-form-col {
+        background-color: white;
+    }
+
+    .form-floating {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .form-floating > label {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding-left: 1rem;
+        height: 58px;
+        border-color: #e0e0e0;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+    }
+
+    .password-container {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        z-index: 10;
+        color: #6c757d;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Password strength */
+    .password-strength .progress-bar {
+        transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .password-strength .progress-bar.weak {
+        background-color: #dc3545;
+    }
+
+    .password-strength .progress-bar.medium {
+        background-color: #ffc107;
+    }
+
+    .password-strength .progress-bar.strong {
+        background-color: #28a745;
+    }
+
+    /* Pulsanti */
+    .btn-primary {
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: darken(var(--primary-color), 10%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Testo gradient */
+    .text-gradient {
+        background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+    }
+
+    /* Animazioni */
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 1s ease forwards;
+    }
+
+    .slide-up {
+        animation: slideUp 0.8s ease forwards;
+    }
+
+    .delay-1 {
+        animation-delay: 0.2s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    .delay-2 {
+        animation-delay: 0.4s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    /* Media Queries */
+    @@media (max-width: 992px) {
+        .auth-page {
+            padding: 2rem 0;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Toggle password visibility
+            $('#togglePassword').click(function() {
+                const passwordInput = $('#password');
+                const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+                passwordInput.attr('type', type);
+
+                // Change eye icon
+                $(this).toggleClass('bi-eye bi-eye-slash');
+            });
+
+            // Password strength meter
+            $('#password').on('input', function() {
+                const password = $(this).val();
+                const progressBar = $('#passwordStrength .progress-bar');
+                const strength = calculatePasswordStrength(password);
+
+                // Update progress bar
+                progressBar.css('width', strength.score + '%');
+                progressBar.removeClass('weak medium strong');
+
+                if (strength.score > 0) {
+                    progressBar.addClass(strength.level);
+                }
+
+                // Update badge highlight
+                $('#passwordStrength .badge').removeClass('bg-danger bg-warning bg-success').addClass('text-muted');
+                if (strength.score >= 70) {
+                    $('#passwordStrength .badge:eq(2)').removeClass('text-muted').addClass('bg-success');
+                } else if (strength.score >= 40) {
+                    $('#passwordStrength .badge:eq(1)').removeClass('text-muted').addClass('bg-warning');
+                } else if (strength.score > 0) {
+                    $('#passwordStrength .badge:eq(0)').removeClass('text-muted').addClass('bg-danger');
+                }
+            });
+
+            // Function to calculate password strength
+            function calculatePasswordStrength(password) {
+                if (!password) return { score: 0, level: '' };
+
+                let score = 0;
+
+                // Length
+                if (password.length > 8) score += 20;
+                else if (password.length > 5) score += 10;
+                else score += 5;
+
+                // Complexity
+                if (/[A-Z]/.test(password)) score += 20; // uppercase
+                if (/[a-z]/.test(password)) score += 15; // lowercase
+                if (/[0-9]/.test(password)) score += 20; // numbers
+                if (/[^A-Za-z0-9]/.test(password)) score += 25; // special chars
+
+                let level = '';
+                if (score >= 70) level = 'strong';
+                else if (score >= 40) level = 'medium';
+                else level = 'weak';
+
+                return { score, level };
+            }
+        });
+    </script>
+}

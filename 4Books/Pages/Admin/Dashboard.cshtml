@@ -1,0 +1,37 @@
+﻿@page
+@model _4Books.Pages.Admin.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard Amministratore";
+}
+
+<h1>Dashboard Amministratore</h1>
+
+<div class="alert alert-info">
+    Benvenuto, @User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value @User.FindFirst(System.Security.Claims.ClaimTypes.Surname)?.Value!
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Gestione Utenti</h4>
+            </div>
+            <div class="card-body">
+                <p>Da qui puoi visualizzare e gestire tutti gli utenti registrati.</p>
+                <a asp-page="/Admin/Users" class="btn btn-primary">Gestisci Utenti</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Statistiche</h4>
+            </div>
+            <div class="card-body">
+                <p>Totale utenti: @Model.TotalUsers</p>
+                <p>Utenti registrati oggi: @Model.NewUsersToday</p>
+                <p>Utenti attivi nell'ultima settimana: @Model.ActiveUsersLastWeek</p>
+            </div>
+        </div>
+    </div>
+</div>

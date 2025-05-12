@@ -1,0 +1,94 @@
+﻿@page
+@model _4Books.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "Gestione Utenti";
+}
+
+<h1>Gestione Utenti</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    var statusClass = Model.StatusMessage.StartsWith("Errore") ? "danger" : "success";
+    <div class="alert alert-@statusClass alert-dismissible fade show" role="alert">
+        @Model.StatusMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="mb-3">
+    <a asp-page="/Admin/Dashboard" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Torna alla Dashboard
+    </a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Email</th>
+            <th>Ruolo</th>
+            <th>Data Registrazione</th>
+            <th>Ultimo Accesso</th>
+            <th>Azioni</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.Id</td>
+                <td>@user.FirstName</td>
+                <td>@user.LastName</td>
+                <td>@user.Email</td>
+                <td>@user.Role</td>
+                <td>@user.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    @(user.LastLoginDate.HasValue
+                        ? user.LastLoginDate.Value.ToString("dd/MM/yyyy HH:mm")
+                        : "Mai")
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <a asp-page="/Admin/UserDetails" asp-route-id="@user.Id" class="btn btn-info btn-sm">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a asp-page="/Admin/UserEdit" asp-route-id="@user.Id" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal-@user.Id">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modal per eliminazione -->
+                    <div class="modal fade" id="deleteModal-@user.Id" tabindex="-1"
+                     aria-labelledby="deleteModalLabel-@user.Id" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel-@user.Id">Conferma eliminazione</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Sei sicuro di voler eliminare l'utente <strong>@user.FullName</strong>?
+                                    <br>
+                                    Questa operazione non può essere annullata.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                                    <form method="post" asp-page="/Admin/UserDetails" asp-page-handler="Delete" asp-route-id="@user.Id">
+                                        <button type="submit" class="btn btn-danger">Elimina</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,442 @@
+﻿@page
+@model _4Books.Pages.Users.FavoritesModel
+@{
+    ViewData["Title"] = "I Miei Libri Preferiti";
+}
+
+<div class="favorites-page">
+    <div class="container py-4">
+        <!-- Header della pagina con animazione -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="page-header fade-in">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div class="d-flex align-items-center">
+                            <span class="favorites-icon me-3">
+                                <i class="bi bi-heart-fill"></i>
+                            </span>
+                            <div>
+                                <h1 class="mb-0">I Miei Preferiti</h1>
+                                <p class="text-muted mb-0">La tua collezione personale di libri</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 mt-md-0">
+                            <a asp-page="/Book/Index" class="btn btn-outline-primary rounded-pill">
+                                <i class="bi bi-search me-2"></i>Scopri nuovi libri
+                            </a>
+                        </div>
+                    </div>
+                    <hr class="mt-4">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenuto principale -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                @if (!Model.FavoriteBooks.Any())
+                {
+                    <div class="empty-state text-center py-5 slide-up">
+                        <div class="empty-state-icon mb-4">
+                            <i class="bi bi-bookmark-heart"></i>
+                        </div>
+                        <h3>La tua collezione è vuota</h3>
+                        <p class="text-muted mb-4">Non hai ancora salvato nessun libro tra i preferiti.<br>Inizia a esplorare e salva i libri che ti interessano di più.</p>
+                        <a asp-page="/Book/Index" class="btn btn-primary btn-lg rounded-pill px-4">
+                            <i class="bi bi-book me-2"></i>Esplora il catalogo
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <!-- Opzioni di visualizzazione e filtri -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+                        <div>
+                            <span class="badge bg-primary rounded-pill">@Model.FavoriteBooks.Count() libri</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="btn-group view-options me-2" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary active" id="grid-view">
+                                    <i class="bi bi-grid"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="list-view">
+                                    <i class="bi bi-list-ul"></i>
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-sort-alpha-down me-1"></i>Ordina
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+                                    <li><a class="dropdown-item" href="#" id="sort-title-asc">Titolo (A-Z)</a></li>
+                                    <li><a class="dropdown-item" href="#" id="sort-title-desc">Titolo (Z-A)</a></li>
+                                    <li><a class="dropdown-item" href="#" id="sort-date-desc">Data aggiunta (recenti)</a></li>
+                                    <li><a class="dropdown-item" href="#" id="sort-date-asc">Data aggiunta (meno recenti)</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Griglia dei libri preferiti -->
+                    <div class="row favorites-grid" id="favorites-container">
+                        @foreach (var book in Model.FavoriteBooks)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4 book-item slide-up" data-title="@book.Title">
+                                <div class="card book-card h-100">
+                                    <div class="card-body p-0">
+                                        <div class="book-header">
+                                            @if (!string.IsNullOrEmpty(book.ThumbnailUrl))
+                                            {
+                                                <img src="@book.ThumbnailUrl" class="book-cover" alt="@book.Title">
+                                            }
+                                            else
+                                            {
+                                                <div class="book-cover no-image">
+                                                    <i class="bi bi-book"></i>
+                                                </div>
+                                            }
+                                            <div class="book-header-overlay">
+                                                @if (!string.IsNullOrEmpty(book.InfoLink))
+                                                {
+                                                    <a href="@book.InfoLink" target="_blank" class="btn btn-sm btn-light rounded-circle" title="Vedi su Google Books">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="book-content p-3">
+                                            <h5 class="book-title">@book.Title</h5>
+
+                                            @if (book.Authors != null && book.Authors.Any())
+                                            {
+                                                <p class="book-authors text-muted mb-2">@string.Join(", ", book.Authors)</p>
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(book.Publisher))
+                                            {
+                                                <p class="book-publisher small mb-2">
+                                                    <i class="bi bi-building text-secondary me-1"></i>@book.Publisher
+                                                </p>
+                                            }
+
+                                            @if (book.Categories != null && book.Categories.Any())
+                                            {
+                                                <div class="book-categories mb-3">
+                                                    @foreach (var category in book.Categories.Take(2))
+                                                    {
+                                                        <span class="badge bg-light text-dark me-1">@category</span>
+                                                    }
+                                                    @if (book.Categories.Count > 2)
+                                                    {
+                                                        <span class="badge bg-light text-dark">+@(book.Categories.Count - 2)</span>
+                                                    }
+                                                </div>
+                                            }
+
+                                            <div class="d-grid mt-auto">
+                                                <form method="post" asp-page-handler="RemoveFavorite">
+                                                    <input type="hidden" name="bookId" value="@book.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 remove-favorite-btn">
+                                                        <i class="bi bi-heart-fill me-1"></i> Rimuovi dai preferiti
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast per notifiche -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="favoriteToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-heart-fill me-2"></i> Libro rimosso dai preferiti
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .favorites-page {
+        background-color: var(--light-bg);
+        min-height: calc(100vh - 300px);
+    }
+
+    /* Header styling */
+    .page-header {
+        position: relative;
+    }
+
+    .favorites-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .favorites-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+    /* Empty state styling */
+    .empty-state-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background-color: rgba(var(--accent-color-rgb), 0.1);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .empty-state-icon i {
+            font-size: 48px;
+            color: var(--accent-color);
+        }
+
+    /* Book card styling */
+    .book-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+    .book-header {
+        height: 200px;
+        position: relative;
+        background-color: #f5f5f5;
+        overflow: hidden;
+    }
+
+    .book-cover {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .book-card:hover .book-cover {
+        transform: scale(1.05);
+    }
+
+    .no-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #e9e9e9;
+    }
+
+        .no-image i {
+            font-size: 48px;
+            color: #aaa;
+        }
+
+    .book-header-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 10px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .book-card:hover .book-header-overlay {
+        opacity: 1;
+    }
+
+    .book-content {
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 200px);
+    }
+
+    .book-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 5px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .book-authors {
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* List view styling */
+    .list-view .book-item {
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+    .list-view .book-card {
+        flex-direction: row;
+    }
+
+    .list-view .book-header {
+        width: 140px;
+        height: auto;
+    }
+
+    .list-view .book-content {
+        width: calc(100% - 140px);
+        height: auto;
+        padding: 15px !important;
+    }
+
+    /* Buttons styling */
+    .remove-favorite-btn {
+        border-radius: 50px;
+        transition: all 0.2s ease;
+    }
+
+        .remove-favorite-btn:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+    /* Animations */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 1s ease forwards;
+    }
+
+    .slide-up {
+        animation: slideUp 0.8s ease forwards;
+    }
+
+    /* Staggered animation for grid items */
+    .book-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .book-item:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .book-item:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .book-item:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .book-item:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .book-item:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+    /* e così via... */
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Cambiare visualizzazione: griglia o lista
+            $('#grid-view').click(function() {
+                $(this).addClass('active');
+                $('#list-view').removeClass('active');
+                $('#favorites-container').removeClass('list-view');
+            });
+
+            $('#list-view').click(function() {
+                $(this).addClass('active');
+                $('#grid-view').removeClass('active');
+                $('#favorites-container').addClass('list-view');
+            });
+
+            // Ordinamento
+            $('#sort-title-asc').click(function(e) {
+                e.preventDefault();
+                sortBooks('title', 'asc');
+            });
+
+            $('#sort-title-desc').click(function(e) {
+                e.preventDefault();
+                sortBooks('title', 'desc');
+            });
+
+            // Funzione di ordinamento
+            function sortBooks(property, order) {
+                const items = $('#favorites-container').find('.book-item').get();
+
+                items.sort(function(a, b) {
+                    const aValue = $(a).data(property);
+                    const bValue = $(b).data(property);
+
+                    if (order === 'asc') {
+                        return aValue.localeCompare(bValue);
+                    } else {
+                        return bValue.localeCompare(aValue);
+                    }
+                });
+
+                $('#favorites-container').append(items);
+            }
+
+            // Inizializzazione toast per rimozione preferiti
+            $('.remove-favorite-btn').click(function() {
+                // Mostra il toast al click del pulsante rimuovi
+                const toast = new bootstrap.Toast($('#favoriteToast'));
+
+                // Questo è solo per feedback immediato, l'effettiva rimozione avviene via form post
+                setTimeout(() => {
+                    toast.show();
+                }, 300);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,366 @@
+﻿@page
+@model _4Books.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Accedi";
+}
+
+<div class="auth-page login-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-75">
+            <div class="col-lg-9">
+                <div class="auth-card card border-0 shadow-lg overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-lg-6 d-none d-lg-block auth-bg-col">
+                            <div class="auth-illustration h-100 d-flex flex-column justify-content-between p-5">
+                                <div class="auth-logo text-white mb-5 fade-in">
+                                    <h1><i class="bi bi-book"></i> 4Books</h1>
+                                    <p class="lead">Il tuo universo di libri a portata di click</p>
+                                </div>
+                                <div class="auth-quotes text-white slide-up delay-1">
+                                    <blockquote id="randomQuote">
+                                        <p id="quoteText">"I libri sono specchi: riflettono ciò che abbiamo dentro."</p>
+                                        <footer id="quoteAuthor">— Carlos Ruiz Zafón</footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 auth-form-col">
+                            <div class="card-body p-4 p-lg-5">
+                                <div class="d-block d-lg-none text-center mb-4">
+                                    <h2 class="h1 text-gradient"><i class="bi bi-book me-2"></i>4Books</h2>
+                                </div>
+
+                                <div class="text-center mb-4 fade-in">
+                                    <h2 class="mb-1">Bentornato!</h2>
+                                    <p class="text-muted">Accedi al tuo account per continuare</p>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                            <div>@Model.ErrorMessage</div>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+
+                                <form method="post" class="slide-up needs-validation">
+                                    <input type="hidden" asp-for="ReturnUrl" />
+
+                                    <div class="form-floating mb-4">
+                                        <input asp-for="Input.Email" class="form-control" placeholder="Email" required autofocus />
+                                        <label asp-for="Input.Email" class="form-label">
+                                            <i class="bi bi-envelope me-2 text-muted"></i>Email
+                                        </label>
+                                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-floating mb-4">
+                                        <input asp-for="Input.Password" class="form-control" placeholder="Password" required />
+                                        <label asp-for="Input.Password" class="form-label">
+                                            <i class="bi bi-lock me-2 text-muted"></i>Password
+                                        </label>
+                                        <span class="password-toggle">
+                                            <i class="bi bi-eye" id="togglePassword"></i>
+                                        </span>
+                                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <div class="form-check">
+                                            <input asp-for="Input.RememberMe" class="form-check-input" />
+                                            <label asp-for="Input.RememberMe" class="form-check-label">Ricordami</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2 mb-4">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>Accedi
+                                        </button>
+                                    </div>
+
+                                </form>
+
+                                <div class="text-center mt-4 slide-up delay-2">
+                                    <p class="mb-0">Non hai un account?</p>
+                                    <a asp-page="/Account/Register" class="btn btn-link fw-bold text-decoration-none">
+                                        Registrati <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Stili per la pagina di autenticazione */
+    .auth-page {
+        background-color: var(--light-bg);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 3rem 0;
+    }
+
+    .min-vh-75 {
+        min-height: 75vh;
+    }
+
+    .auth-card {
+        border-radius: 20px;
+    }
+
+    /* Colonna di sfondo */
+    .auth-bg-col {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-bg-col::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,.1)' fill-rule='evenodd'/%3E%3C/svg%3E");
+        opacity: 0.4;
+        z-index: 0;
+    }
+
+    .auth-logo, .auth-quotes {
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-quotes blockquote {
+        font-style: italic;
+        border-left: 3px solid rgba(255, 255, 255, 0.5);
+        padding-left: 1rem;
+    }
+
+    .auth-quotes blockquote footer {
+        opacity: 0.8;
+        margin-top: 10px;
+    }
+
+    /* Stili form */
+    .auth-form-col {
+        background-color: white;
+    }
+
+    .form-floating > label {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding-left: 1rem;
+        height: 58px;
+        border-color: #e0e0e0;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        z-index: 10;
+        color: #6c757d;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Pulsanti */
+    .btn-primary {
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: darken(var(--primary-color), 10%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .social-auth .btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        padding: 0;
+        line-height: 46px;
+        font-size: 1.2rem;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .social-auth .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Testo gradient */
+    .text-gradient {
+        background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+    }
+
+    /* Animazioni */
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 1s ease forwards;
+    }
+
+    .slide-up {
+        animation: slideUp 0.8s ease forwards;
+    }
+
+    .delay-1 {
+        animation-delay: 0.2s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    .delay-2 {
+        animation-delay: 0.4s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    /* Media Queries */
+    @@media (max-width: 992px) {
+        .auth-page {
+            padding: 2rem 0;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Toggle password visibility
+            $('#togglePassword').click(function () {
+                const passwordInput = $('#Input_Password');
+                const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+                passwordInput.attr('type', type);
+
+                // Change eye icon
+                $(this).toggleClass('bi-eye bi-eye-slash');
+            });
+
+            // Focus sul campo email
+            setTimeout(function () {
+                $('#Input_Email').focus();
+            }, 500);
+
+            // Array di citazioni sui libri
+            const quotes = [
+                {
+                    text: "I libri sono specchi: riflettono ciò che abbiamo dentro.",
+                    author: "Carlos Ruiz Zafón"
+                },
+                {
+                    text: "Un libro ben scelto ti salva da qualsiasi cosa, persino da te stesso.",
+                    author: "Daniel Pennac"
+                },
+                {
+                    text: "Leggere è andare incontro a qualcosa che sta per essere e ancora nessuno sa cosa sarà.",
+                    author: "Italo Calvino"
+                },
+                {
+                    text: "Un libro è un giardino che puoi custodire in tasca.",
+                    author: "Proverbio cinese"
+                },
+                {
+                    text: "I libri sono amici silenziosi e costanti, i migliori in ogni tempo e stagione.",
+                    author: "Baruch Spinoza"
+                },
+                {
+                    text: "Chi legge vive mille vite prima di morire. Chi non legge ne vive una sola.",
+                    author: "George R.R. Martin"
+                },
+                {
+                    text: "Un libro deve essere come un'ascia per il mare ghiacciato che è dentro di noi.",
+                    author: "Franz Kafka"
+                },
+                {
+                    text: "Leggere è viaggiare senza la seccatura di dover fare i bagagli.",
+                    author: "Emilio Salgari"
+                },
+                {
+                    text: "I libri sono i nostri migliori amici: non fanno domande e non criticano le risposte.",
+                    author: "Ennio Flaiano"
+                },
+                {
+                    text: "Leggere è sognare ad occhi aperti.",
+                    author: "Umberto Eco"
+                },
+                {
+                    text: "Non hai veramente un libro se non l'hai letto almeno una volta.",
+                    author: "Jorge Luis Borges"
+                },
+                {
+                    text: "La lettura è il viaggio di chi non può prendere un treno.",
+                    author: "Francis de Croisset"
+                }
+            ];
+
+            // Seleziona una citazione casuale
+            function getRandomQuote() {
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                return quotes[randomIndex];
+            }
+
+            // Aggiorna la citazione nella pagina
+            function displayRandomQuote() {
+                const quote = getRandomQuote();
+                $('#quoteText').text('"' + quote.text + '"');
+                $('#quoteAuthor').text('— ' + quote.author);
+            }
+
+            // Mostra una citazione casuale
+            displayRandomQuote();
+        });
+    </script>
+}

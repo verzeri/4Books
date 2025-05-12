@@ -1,0 +1,799 @@
+﻿@page
+@model _4Books.Pages.Book.IndexModel
+@{
+    ViewData["Title"] = "Ricerca Libri";
+}
+
+<div class="book-search-page">
+    <div class="container py-5">
+        <!-- Header della pagina con animazione -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center mb-5 fade-in">
+                <h1 class="display-4 fw-bold text-gradient mb-3">4Books</h1>
+                <p class="lead mb-4">Il tuo universo di libri a portata di click</p>
+                <div class="d-flex justify-content-center">
+                    <div class="book-animation me-2">📚</div>
+                    <div class="book-animation delay-1">📖</div>
+                    <div class="book-animation delay-2 me-2">📕</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form di ricerca principale -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 slide-up">
+                <div class="card search-card shadow-lg">
+                    <div class="card-body p-4">
+                        <h2 class="card-title text-center mb-4">Cerca il tuo prossimo libro</h2>
+
+                        <form method="get" action="/Book/Results" class="mb-4">
+                            <div class="search-box mb-4">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" name="title" class="form-control border-start-0 shadow-none"
+                                           placeholder="Titolo del libro..." required>
+                                </div>
+                            </div>
+
+                            <div class="row align-items-center mb-3">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label for="maxResults" class="form-label">Numero di risultati:</label>
+                                    <select name="maxResults" id="maxResults" class="form-select">
+                                        <option value="5">5 risultati</option>
+                                        <option value="10" selected>10 risultati</option>
+                                        <option value="20">20 risultati</option>
+                                        <option value="40">40 risultati</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 d-grid">
+                                    <button class="btn btn-primary btn-lg" type="submit">
+                                        <i class="bi bi-book me-2"></i> Cerca
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione categorie popolari -->
+        <div class="row justify-content-center mt-5 fade-in delay-3">
+            <div class="col-lg-10">
+                <h3 class="text-center mb-4">Categorie popolari</h3>
+                <div class="row g-3 justify-content-center">
+                    <div class="col-6 col-md-3">
+                        <a href="/Book/Results?title=fiction&category=fiction" class="category-card">
+                            <div class="card h-100 text-center category-item">
+                                <div class="card-body">
+                                    <i class="bi bi-book display-5 mb-3"></i>
+                                    <h5 class="card-title">Narrativa</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a href="/Book/Results?title=science&category=science" class="category-card">
+                            <div class="card h-100 text-center category-item">
+                                <div class="card-body">
+                                    <i class="bi bi-lightbulb display-5 mb-3"></i>
+                                    <h5 class="card-title">Scienza</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a href="/Book/Results?title=history&category=history" class="category-card">
+                            <div class="card h-100 text-center category-item">
+                                <div class="card-body">
+                                    <i class="bi bi-bank display-5 mb-3"></i>
+                                    <h5 class="card-title">Storia</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a href="/Book/Results?title=business&category=business" class="category-card">
+                            <div class="card h-100 text-center category-item">
+                                <div class="card-body">
+                                    <i class="bi bi-briefcase display-5 mb-3"></i>
+                                    <h5 class="card-title">Business</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggerimenti di lettura -->
+        <div class="row justify-content-center mt-5 slide-up delay-2">
+            <div class="col-lg-10">
+                <div class="card reading-suggestions">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4">Consigliati per te</h3>
+                        <div class="suggestions-wrapper">
+                            <p class="card-text" id="suggestionsIntro">Esplora questi titoli selezionati dai nostri esperti:</p>
+                            <div class="d-flex flex-nowrap overflow-auto pb-3 suggestions-scroller" id="suggestionsContainer">
+                                <!-- I suggerimenti verranno caricati dinamicamente -->
+                                <div class="text-center w-100 py-3 loading-placeholder">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Caricamento...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Stili specifici per la pagina di ricerca */
+    .book-search-page {
+        background-color: var(--light-bg);
+        min-height: calc(100vh - 300px);
+    }
+
+    .text-gradient {
+        background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+    }
+
+    .search-card {
+        border-radius: 15px;
+        border: none;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .search-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .search-box .input-group {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+    .search-box .form-control {
+        border-radius: 0 50px 50px 0;
+        height: 60px;
+        font-size: 1.1rem;
+    }
+
+    .search-box .input-group-text {
+        border-radius: 50px 0 0 50px;
+        font-size: 1.2rem;
+    }
+
+    .btn-primary {
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Stili per categorie */
+    .category-card {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .category-item {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+        .category-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-item i {
+            color: var(--accent-color);
+        }
+
+    /* Stili per suggerimenti */
+    .reading-suggestions {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .suggestions-scroller {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+        .suggestions-scroller::-webkit-scrollbar {
+            display: none;
+        }
+
+    .suggestion-item {
+        min-width: 140px;
+        margin-right: 20px;
+        text-align: center;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+        .suggestion-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .suggestion-item img {
+            height: 180px;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Animazioni */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes float {
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 1s ease forwards;
+    }
+
+    .slide-up {
+        animation: slideUp 0.8s ease forwards;
+    }
+
+    .delay-1 {
+        animation-delay: 0.2s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    .delay-2 {
+        animation-delay: 0.4s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    .delay-3 {
+        animation-delay: 0.6s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+
+    .book-animation {
+        font-size: 2.5rem;
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
+    /* Stili migliorati per le copertine dei libri */
+    .suggestion-item img {
+        height: 180px;
+        width: 120px;
+        object-fit: cover;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
+        border-radius: 4px;
+    }
+
+    .suggestion-item:hover img {
+        transform: translateY(-5px);
+    }
+
+    .suggestion-item h6 {
+        margin-top: 8px;
+        font-size: 0.95rem;
+        max-width: 120px;
+        white-space: normal;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Aggiunge effetto di scorrimento fluido tra le sezioni
+            $('a[href^="#"]').on('click', function (event) {
+                var target = $(this.getAttribute('href'));
+                if (target.length) {
+                    event.preventDefault();
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top
+                    }, 1000);
+                }
+            });
+
+            // Focus automatico sul campo di ricerca
+            setTimeout(function () {
+                $('input[name="title"]').first().focus();
+            }, 500);
+
+            // Sistema di raccomandazioni personalizzate
+            loadPersonalizedRecommendations();
+
+            // Gestione dei form di ricerca per salvare i termini di ricerca
+            $('form').on('submit', function () {
+                const searchTerm = $(this).find('input[name="title"]').val();
+                if (searchTerm) {
+                    saveSearchTerm(searchTerm);
+                }
+
+                const category = $(this).find('select[name="category"]').val();
+                if (category) {
+                    saveSearchCategory(category);
+                }
+
+                const author = $(this).find('input[name="author"]').val();
+                if (author) {
+                    saveSearchAuthor(author);
+                }
+            });
+        });
+
+        // Database di libri consigliati con URL di copertine verificate manualmente
+        const bookRecommendations = {
+            default: [
+                {
+                    title: "Il nome della rosa",
+                    author: "Umberto Eco",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1375719591l/18453515.jpg",
+                    category: "fiction"
+                },
+                {
+                    title: "Harry Potter e la pietra filosofale",
+                    author: "J.K. Rowling",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1546910265l/8003257._SY475_.jpg",
+                    category: "fantasy"
+                },
+                {
+                    title: "1984",
+                    author: "George Orwell",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1657781256l/61439040._SY475_.jpg",
+                    category: "fiction"
+                },
+                {
+                    title: "Il Signore degli Anelli",
+                    author: "J.R.R. Tolkien",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1309288315l/12154.jpg",
+                    category: "fantasy"
+                },
+                {
+                    title: "Sapiens: Da animali a dèi",
+                    author: "Yuval Noah Harari",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1420585954l/23692271.jpg",
+                    category: "nonfiction"
+                }
+            ],
+            fiction: [
+                {
+                    title: "Il Grande Gatsby",
+                    author: "F. Scott Fitzgerald",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1490528560l/6519._SY475_.jpg",
+                    category: "fiction"
+                },
+                {
+                    title: "Piccole Donne",
+                    author: "Louisa May Alcott",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1562690475l/1934._SY475_.jpg",
+                    category: "fiction"
+                },
+                {
+                    title: "L'ombra del vento",
+                    author: "Carlos Ruiz Zafón",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1344545047l/1232._SY475_.jpg",
+                    category: "fiction"
+                },
+                {
+                    title: "Orgoglio e pregiudizio",
+                    author: "Jane Austen",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1320399351l/1885.jpg",
+                    category: "fiction"
+                },
+                {
+                    title: "Cime tempestose",
+                    author: "Emily Brontë",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1587655304l/6185._SY475_.jpg",
+                    category: "fiction"
+                }
+            ],
+            fantasy: [
+                {
+                    title: "Le cronache di Narnia",
+                    author: "C.S. Lewis",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1449868701l/11127._SY475_.jpg",
+                    category: "fantasy"
+                },
+                {
+                    title: "Il Trono di Spade",
+                    author: "George R.R. Martin",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1576823287l/13496.jpg",
+                    category: "fantasy"
+                },
+                {
+                    title: "American Gods",
+                    author: "Neil Gaiman",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1462924585l/30165203.jpg",
+                    category: "fantasy"
+                },
+                {
+                    title: "La Ruota del Tempo",
+                    author: "Robert Jordan",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1337818095l/228665.jpg",
+                    category: "fantasy"
+                },
+                {
+                    title: "Mistborn",
+                    author: "Brandon Sanderson",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1312866764l/68428.jpg",
+                    category: "fantasy"
+                }
+            ],
+            science: [
+                {
+                    title: "Breve storia del tempo",
+                    author: "Stephen Hawking",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1333578746l/3869._SY475_.jpg",
+                    category: "science"
+                },
+                {
+                    title: "L'origine delle specie",
+                    author: "Charles Darwin",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1298417570l/22463.jpg",
+                    category: "science"
+                },
+                {
+                    title: "Cosmos",
+                    author: "Carl Sagan",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1388620656l/55030.jpg",
+                    category: "science"
+                },
+                {
+                    title: "Il gene egoista",
+                    author: "Richard Dawkins",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1366758096l/61535.jpg",
+                    category: "science"
+                },
+                {
+                    title: "La fisica del futuro",
+                    author: "Michio Kaku",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1356789315l/11289753.jpg",
+                    category: "science"
+                }
+            ],
+            history: [
+                {
+                    title: "Storia d'Italia",
+                    author: "Indro Montanelli",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1348034373l/1940611.jpg",
+                    category: "history"
+                },
+                {
+                    title: "SPQR: Storia dell'antica Roma",
+                    author: "Mary Beard",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1456161659l/28789711.jpg",
+                    category: "history"
+                },
+                {
+                    title: "Armi, acciaio e malattie",
+                    author: "Jared Diamond",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1453215833l/1842.jpg",
+                    category: "history"
+                },
+                {
+                    title: "I Medici",
+                    author: "Matteo Strukul",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1474015406l/32194111._SY475_.jpg",
+                    category: "history"
+                },
+                {
+                    title: "Le vene aperte dell'America Latina",
+                    author: "Eduardo Galeano",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1348697145l/53568._SY475_.jpg",
+                    category: "history"
+                }
+            ],
+            biography: [
+                {
+                    title: "Steve Jobs",
+                    author: "Walter Isaacson",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1511288482l/11084145._SY475_.jpg",
+                    category: "biography"
+                },
+                {
+                    title: "Io sono Malala",
+                    author: "Malala Yousafzai",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1375728173l/17851885.jpg",
+                    category: "biography"
+                },
+                {
+                    title: "Lungo cammino verso la libertà",
+                    author: "Nelson Mandela",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1486132191l/34083._SY475_.jpg",
+                    category: "biography"
+                },
+                {
+                    title: "Open",
+                    author: "Andre Agassi",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1356114430l/6480781.jpg",
+                    category: "biography"
+                },
+                {
+                    title: "Becoming",
+                    author: "Michelle Obama",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1528206996l/38746485.jpg",
+                    category: "biography"
+                }
+            ],
+            business: [
+                {
+                    title: "Thinking, Fast and Slow",
+                    author: "Daniel Kahneman",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1317793965l/11468377.jpg",
+                    category: "business"
+                },
+                {
+                    title: "Zero to One",
+                    author: "Peter Thiel",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1414347376l/18050143.jpg",
+                    category: "business"
+                },
+                {
+                    title: "Padre ricco padre povero",
+                    author: "Robert Kiyosaki",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1388211242l/69571.jpg",
+                    category: "business"
+                },
+                {
+                    title: "L'arte della guerra",
+                    author: "Sun Tzu",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1630673897l/10534._SY475_.jpg",
+                    category: "business"
+                },
+                {
+                    title: "Scarcity",
+                    author: "Sendhil Mullainathan",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1354361601l/15987702.jpg",
+                    category: "business"
+                }
+            ],
+            poetry: [
+                {
+                    title: "Foglie d'erba",
+                    author: "Walt Whitman",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1371657348l/18524._SY475_.jpg",
+                    category: "poetry"
+                },
+                {
+                    title: "Canzoniere",
+                    author: "Francesco Petrarca",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1266584666l/7444157.jpg",
+                    category: "poetry"
+                },
+                {
+                    title: "La Divina Commedia",
+                    author: "Dante Alighieri",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1390226852l/6656.jpg",
+                    category: "poetry"
+                },
+                {
+                    title: "Poesie",
+                    author: "Emily Dickinson",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1538351758l/42080869._SY475_.jpg",
+                    category: "poetry"
+                },
+                {
+                    title: "I fiori del male",
+                    author: "Charles Baudelaire",
+                    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1568582861l/15416._SY475_.jpg",
+                    category: "poetry"
+                }
+            ]
+        };
+
+        // Keyword mappings to categories
+        const keywordToCategory = {
+            'romanzo': 'fiction',
+            'fantasia': 'fantasy',
+            'magia': 'fantasy',
+            'draghi': 'fantasy',
+            'maghi': 'fantasy',
+            'scienza': 'science',
+            'fisica': 'science',
+            'biologia': 'science',
+            'chimica': 'science',
+            'storia': 'history',
+            'storico': 'history',
+            'guerra': 'history',
+            'biografia': 'biography',
+            'autobiografia': 'biography',
+            'memoir': 'biography',
+            'business': 'business',
+            'economia': 'business',
+            'management': 'business',
+            'leadership': 'business',
+            'poesia': 'poetry',
+            'poesie': 'poetry',
+            'versi': 'poetry',
+        };
+
+        // Salva il termine di ricerca in localStorage
+        function saveSearchTerm(term) {
+            if (!term) return;
+
+            let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            searchHistory = [term.toLowerCase(), ...searchHistory].slice(0, 10); // Mantiene solo gli ultimi 10 termini
+
+            // Rimuove duplicati
+            searchHistory = [...new Set(searchHistory)];
+
+            localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+        }
+
+        // Salva la categoria cercata
+        function saveSearchCategory(category) {
+            if (!category) return;
+
+            let categoryHistory = JSON.parse(localStorage.getItem('categoryHistory') || '[]');
+            categoryHistory = [category.toLowerCase(), ...categoryHistory].slice(0, 5);
+            categoryHistory = [...new Set(categoryHistory)];
+
+            localStorage.setItem('categoryHistory', JSON.stringify(categoryHistory));
+        }
+
+        // Salva l'autore cercato
+        function saveSearchAuthor(author) {
+            if (!author) return;
+
+            let authorHistory = JSON.parse(localStorage.getItem('authorHistory') || '[]');
+            authorHistory = [author.toLowerCase(), ...authorHistory].slice(0, 5);
+            authorHistory = [...new Set(authorHistory)];
+
+            localStorage.setItem('authorHistory', JSON.stringify(authorHistory));
+        }
+
+        // Carica consigli personalizzati
+        function loadPersonalizedRecommendations() {
+            const searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            const categoryHistory = JSON.parse(localStorage.getItem('categoryHistory') || '[]');
+            const authorHistory = JSON.parse(localStorage.getItem('authorHistory') || '[]');
+
+            // Se non c'è storia, mostra i consigli predefiniti
+            if (searchHistory.length === 0 && categoryHistory.length === 0 && authorHistory.length === 0) {
+                displayRecommendations(bookRecommendations.default, "Esplora questi titoli selezionati dai nostri esperti:");
+                return;
+            }
+
+            // Determina le categorie basate sulle ricerche passate
+            const relevantCategories = new Set();
+
+            // Controlla le categorie esplicite cercate
+            categoryHistory.forEach(cat => {
+                if (bookRecommendations[cat]) {
+                    relevantCategories.add(cat);
+                }
+            });
+
+            // Cerca di mappare le parole chiave ai generi
+            searchHistory.forEach(term => {
+                for (const [keyword, category] of Object.entries(keywordToCategory)) {
+                    if (term.includes(keyword)) {
+                        relevantCategories.add(category);
+                    }
+                }
+            });
+
+            // Se non abbiamo trovato categorie rilevanti, usa fiction e default come fallback
+            if (relevantCategories.size === 0) {
+                relevantCategories.add('fiction');
+            }
+
+            // Raccoglie libri dalle categorie rilevanti
+            let recommendedBooks = [];
+            relevantCategories.forEach(category => {
+                if (bookRecommendations[category]) {
+                    recommendedBooks = [...recommendedBooks, ...bookRecommendations[category]];
+                }
+            });
+
+            // Assicuriamoci di avere almeno 5 libri
+            if (recommendedBooks.length < 5) {
+                recommendedBooks = [...recommendedBooks, ...bookRecommendations.default.slice(0, 5 - recommendedBooks.length)];
+            }
+
+            // Mescola l'array e prende i primi 5 elementi
+            recommendedBooks = shuffleArray(recommendedBooks).slice(0, 5);
+
+            // Crea un messaggio personalizzato
+            let message = "Libri consigliati in base alle tue ricerche:";
+
+            displayRecommendations(recommendedBooks, message);
+        }
+
+        // Mostra i consigli nella pagina con URL copertine diretti
+        function displayRecommendations(books, message) {
+            const container = $('#suggestionsContainer');
+            container.empty();
+
+            // Aggiorna il messaggio introduttivo
+            $('#suggestionsIntro').text(message);
+
+            // Aggiungi i libri al container
+            books.forEach(book => {
+                // Crea l'elemento libro con l'URL diretto dell'immagine
+                const bookElement = $(`
+                            <div class="suggestion-item">
+                                <img src="${book.cover}"
+                                     alt="${book.title}"
+                                     class="img-fluid rounded mb-2 book-cover"
+                                     onerror="this.onerror=null; this.src='https://via.placeholder.com/120x180?text=Libro+non+disponibile';">
+                                <h6>${book.title}</h6>
+                                <p class="text-muted small">${book.author}</p>
+                            </div>
+                        `);
+
+                container.append(bookElement);
+            });
+
+            // Aggiungi click event ai suggerimenti
+            $('.suggestion-item').click(function () {
+                const title = $(this).find('h6').text();
+                window.location.href = `/Book/Results?title=${encodeURIComponent(title)}`;
+            });
+        }
+
+        // Funzione per mescolare casualmente un array
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+    </script>
+}

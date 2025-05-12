@@ -1,0 +1,1224 @@
+﻿<!DOCTYPE html>
+<html lang="it" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="4Books - La tua libreria digitale personale" />
+    <title>@ViewData["Title"] - 4Books</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="~/favicon.ico" type="image/x-icon" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Poppins:wght@300;400;500;600;700&display=swap" />
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- AOS Animation Library -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/_4Books.styles.css" asp-append-version="true" />
+    
+    <style>
+        /* Custom Variables */
+        :root {
+            /* Light Theme Colors */
+            --primary-color-light: #1a5f7a;
+            --primary-color-rgb-light: 26, 95, 122;
+            --secondary-color-light: #8a9ea3;
+            --accent-color-light: #d57149;
+            --accent-color-rgb-light: 213, 113, 73;
+            --light-bg-light: #f8f5f1;
+            --card-bg-light: #ffffff;
+            --dark-text-light: #333333;
+            --medium-text-light: #555555;
+            --light-text-light: #f8f5f1;
+            --border-color-light: #e0e0e0;
+            --shadow-color-light: rgba(0, 0, 0, 0.1);
+            
+            /* Dark Theme Colors */
+            --primary-color-dark: #2c8cb0;
+            --primary-color-rgb-dark: 44, 140, 176;
+            --secondary-color-dark: #718589;
+            --accent-color-dark: #e68a66;
+            --accent-color-rgb-dark: 230, 138, 102;
+            --light-bg-dark: #1a1d23;
+            --card-bg-dark: #242832;
+            --dark-text-dark: #e0e0e0;
+            --medium-text-dark: #b0b0b0;
+            --light-text-dark: #f8f5f1;
+            --border-color-dark: #3a3f4b;
+            --shadow-color-dark: rgba(0, 0, 0, 0.3);
+            
+            /* Active Theme Colors (initially light) */
+            --primary-color: var(--primary-color-light);
+            --primary-color-rgb: var(--primary-color-rgb-light);
+            --secondary-color: var(--secondary-color-light);
+            --accent-color: var(--accent-color-light);
+            --accent-color-rgb: var(--accent-color-rgb-light);
+            --light-bg: var(--light-bg-light);
+            --card-bg: var(--card-bg-light);
+            --dark-text: var(--dark-text-light);
+            --medium-text: var(--medium-text-light);
+            --light-text: var(--light-text-light);
+            --border-color: var(--border-color-light);
+            --shadow-color: var(--shadow-color-light);
+            
+            /* Layout and Spacing */
+            --navbar-height: 70px;
+            --content-max-width: 1200px;
+            --footer-height: auto;
+            --border-radius-sm: 6px;
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+            --transition-speed: 0.3s;
+        }
+        
+        /* Dark Theme Styles */
+        [data-bs-theme="dark"] {
+            --primary-color: var(--primary-color-dark);
+            --primary-color-rgb: var(--primary-color-rgb-dark);
+            --secondary-color: var(--secondary-color-dark);
+            --accent-color: var(--accent-color-dark);
+            --accent-color-rgb: var(--accent-color-rgb-dark);
+            --light-bg: var(--light-bg-dark);
+            --card-bg: var(--card-bg-dark);
+            --dark-text: var(--dark-text-dark);
+            --medium-text: var(--medium-text-dark);
+            --light-text: var(--light-text-dark);
+            --border-color: var(--border-color-dark);
+            --shadow-color: var(--shadow-color-dark);
+        }
+        
+        /* Base Styles */
+        html {
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: background-color var(--transition-speed) ease;
+            position: relative;
+            padding-top: var(--navbar-height);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Merriweather', serif;
+            color: var(--dark-text);
+            transition: color var(--transition-speed) ease;
+        }
+        
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color var(--transition-speed) ease;
+        }
+        
+        a:hover {
+            color: var(--accent-color);
+        }
+        
+        /* Container Styling */
+        .container {
+            max-width: var(--content-max-width);
+        }
+        
+        /* Main Content Area */
+        main {
+            flex: 1 0 auto;
+            padding: 2rem 0;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        /* Page Loader */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--light-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .page-loader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(var(--primary-color-rgb), 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spinner 1s ease-in-out infinite;
+        }
+        
+        @@keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Progress Bar */
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            z-index: 1040;
+        }
+        
+        .progress-bar-indicator {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        
+        /* Navbar Styling */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            padding: 0;
+            height: var(--navbar-height);
+            z-index: 1030;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .navbar.scrolled {
+            box-shadow: 0 5px 20px var(--shadow-color);
+            height: 60px;
+        }
+        
+        .navbar-brand {
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--light-text) !important;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 0;
+            margin-right: 2rem;
+            transition: transform var(--transition-speed) ease;
+        }
+        
+        .navbar-brand:hover {
+            transform: translateY(-2px);
+        }
+        
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+            transition: transform var(--transition-speed) ease;
+        }
+        
+        .navbar-brand:hover i {
+            transform: rotate(-5deg);
+        }
+        
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            height: 100%;
+        }
+        
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-nav .nav-item {
+            margin: 0 3px;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--light-text) !important;
+            font-weight: 500;
+            padding: 0.7rem 1rem;
+            border-radius: var(--border-radius-sm);
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+        
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background-color: var(--accent-color);
+            border-radius: 10px;
+        }
+        
+        .navbar-nav .nav-link i {
+            margin-right: 5px;
+            font-size: 1.1rem;
+            vertical-align: -1px;
+            transition: transform var(--transition-speed) ease;
+        }
+        
+        .navbar-nav .nav-link:hover i {
+            transform: scale(1.2);
+        }
+        
+        .navbar-toggler {
+            border: none;
+            color: var(--light-text);
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            position: relative;
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+        
+        /* Hamburger Menu */
+        .hamburger-lines {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 20px;
+            width: 26px;
+            position: relative;
+        }
+        
+        .hamburger-lines .line {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: var(--light-text);
+            border-radius: 10px;
+            transition: transform 0.3s ease, opacity 0.2s ease;
+        }
+        
+        .navbar-toggler[aria-expanded="true"] .hamburger-lines .line1 {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        
+        .navbar-toggler[aria-expanded="true"] .hamburger-lines .line2 {
+            opacity: 0;
+        }
+        
+        .navbar-toggler[aria-expanded="true"] .hamburger-lines .line3 {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+        
+        /* Theme Toggler */
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--light-text);
+            cursor: pointer;
+            margin-right: 15px;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+        }
+        
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .theme-toggle i {
+            font-size: 1.3rem;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .theme-toggle .sun-icon,
+        [data-bs-theme="dark"] .theme-toggle .moon-icon {
+            display: none;
+        }
+        
+        .theme-toggle .moon-icon,
+        [data-bs-theme="dark"] .theme-toggle .sun-icon {
+            display: block;
+        }
+        
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+        }
+        
+        .auth-buttons .btn {
+            margin-left: 10px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .auth-buttons .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            z-index: -1;
+            transition: width var(--transition-speed) ease;
+        }
+        
+        .auth-buttons .btn:hover::before {
+            width: 100%;
+        }
+        
+        .btn-login {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background-color: transparent;
+            color: var(--light-text) !important;
+        }
+        
+        .btn-login:hover {
+            border-color: var(--light-text);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-register {
+            background-color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            color: var(--light-text) !important;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--accent-color-rgb), 0.3);
+        }
+        
+        /* User Menu */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            color: var(--light-text);
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), #f3966d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-right: 10px;
+            box-shadow: 0 2px 10px rgba(var(--accent-color-rgb), 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform var(--transition-speed) ease;
+        }
+        
+        .user-menu:hover .user-avatar {
+            transform: scale(1.05);
+        }
+        
+        .user-menu .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .user-menu .dropdown-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-menu .dropdown-toggle::after {
+            margin-left: 8px;
+            vertical-align: 0.15em;
+        }
+        
+        .user-menu .dropdown-menu {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px var(--shadow-color);
+            margin-top: 10px;
+            background-color: var(--card-bg);
+            transition: transform var(--transition-speed) ease, opacity var(--transition-speed) ease;
+            right: 0 !important;
+            left: auto !important;
+            padding: 0.5rem;
+            min-width: 200px;
+            overflow: hidden;
+        }
+        
+        .user-menu .dropdown-item {
+            padding: 0.6rem 1rem;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 2px;
+            transition: all var(--transition-speed) ease;
+            color: var(--dark-text);
+        }
+        
+        .user-menu .dropdown-item:hover,
+        .user-menu .dropdown-item:focus {
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            transform: translateX(5px);
+            color: var(--primary-color);
+        }
+        
+        .user-menu .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .user-menu .dropdown-divider {
+            border-color: var(--border-color);
+        }
+        
+        /* Footer Styling */
+        footer {
+            background-color: var(--primary-color);
+            color: var(--light-text) !important;
+            padding: 3rem 0;
+            margin-top: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color));
+        }
+        
+        footer h5 {
+            font-weight: 700;
+            color: var(--light-text);
+            margin-bottom: 1.2rem;
+            display: inline-block;
+            position: relative;
+        }
+        
+        footer h5::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--accent-color);
+            border-radius: 10px;
+        }
+        
+        footer a {
+            color: rgba(255, 255, 255, 0.8) !important;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            display: inline-block;
+        }
+        
+        footer a:hover {
+            color: var(--light-text) !important;
+            transform: translateX(5px);
+        }
+        
+        footer .list-unstyled li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--light-text) !important;
+            border-radius: 50%;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .social-icons a:hover {
+            transform: translateY(-5px);
+            background-color: var(--accent-color);
+            box-shadow: 0 5px 15px rgba(var(--accent-color-rgb), 0.3);
+        }
+        
+        .footer-copyright {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-logo {
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-logo i {
+            margin-right: 8px;
+        }
+        
+        .footer-pattern {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.5;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: -60px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            opacity: 0;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            z-index: 100;
+        }
+        
+        .back-to-top.visible {
+            bottom: 20px;
+            opacity: 1;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            background-color: var(--accent-color);
+            box-shadow: 0 8px 25px rgba(var(--accent-color-rgb), 0.3);
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--accent-color-rgb), 0.3);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--primary-color-rgb), 0.3);
+        }
+        
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px var(--shadow-color);
+            transition: all var(--transition-speed) ease;
+            background-color: var(--card-bg);
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px var(--shadow-color);
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        /* Badge Styles */
+        .badge-primary {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+        }
+        
+        .badge-accent {
+            background-color: var(--accent-color);
+            color: var(--light-text);
+        }
+        
+        /* Responsive adjustments */
+        @@media (max-width: 992px) {
+            .navbar-container {
+                padding: 0 0.75rem;
+            }
+            
+            .navbar-collapse {
+                position: absolute;
+                top: var(--navbar-height);
+                left: 0;
+                right: 0;
+                background-color: var(--primary-color);
+                padding: 1rem;
+                box-shadow: 0 10px 20px var(--shadow-color);
+                max-height: calc(100vh - var(--navbar-height));
+                overflow-y: auto;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.8rem 1rem;
+                margin-bottom: 0.3rem;
+                border-radius: var(--border-radius-sm);
+            }
+            
+            .navbar-nav .nav-link.active::after {
+                display: none;
+            }
+            
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.15);
+            }
+            
+            .auth-buttons {
+                margin-top: 1rem;
+                justify-content: center;
+            }
+            
+            .auth-buttons .btn {
+                width: 100%;
+                margin: 0.5rem 0;
+                text-align: center;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+            
+            .navbar {
+                height: 60px;
+            }
+            
+            .navbar.scrolled {
+                height: 55px;
+            }
+            
+            .navbar-collapse {
+                top: 60px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .navbar-brand i {
+                font-size: 1.3rem;
+            }
+            
+            footer {
+                padding: 2rem 0;
+            }
+            
+            .social-icons {
+                justify-content: center;
+            }
+        }
+        
+        /* Animations */
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @@keyframes slideInRight {
+            from { transform: translateX(30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @@keyframes slideInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .slide-right {
+            animation: slideInRight 0.6s ease forwards;
+        }
+        
+        .slide-up {
+            animation: slideInUp 0.6s ease forwards;
+        }
+        
+        /* Utility Classes */
+        .text-gradient {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .shadow-sm {
+            box-shadow: 0 2px 8px var(--shadow-color) !important;
+        }
+        
+        .shadow {
+            box-shadow: 0 5px 15px var(--shadow-color) !important;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 15px 35px var(--shadow-color) !important;
+        }
+        
+        .border-radius {
+            border-radius: var(--border-radius) !important;
+        }
+        
+        .border-radius-lg {
+            border-radius: var(--border-radius-lg) !important;
+        }
+        
+        /* Accessibility improvements */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+        
+        .focus-visible:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Page Loader -->
+    <div class="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+        <div class="progress-bar-indicator"></div>
+    </div>
+    
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop">
+        <i class="bi bi-chevron-up"></i>
+    </div>
+    
+    <!-- Header -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container navbar-container">
+                <a class="navbar-brand" href="/">
+                    <i class="bi bi-book"></i>4Books
+                </a>
+                
+                <div class="d-flex align-items-center order-lg-2">
+                    <!-- Theme Toggle Button -->
+                    <div class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                        <i class="bi bi-moon-fill moon-icon"></i>
+                        <i class="bi bi-sun-fill sun-icon"></i>
+                    </div>
+                
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="dropdown user-menu">
+                            <div class="dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar">
+                                    @{
+                                        var name = User.Identity.Name;
+                                        @(name != null ? name[0] : 'U')
+                                    }
+                                </div>
+                                <span class="d-none d-md-inline-block me-2">@User.Identity.Name</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </div>
+                            <ul class="dropdown-menu animate slideIn" aria-labelledby="userDropdown">
+                                <!-- Rimosso il link alla pagina profilo come richiesto -->
+                                <li>
+                                    <a class="dropdown-item" href="/Users/Favorites">
+                                        <i class="bi bi-heart"></i> Preferiti
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="/Admin/Dashboard">
+                                            <i class="bi bi-speedometer2"></i> Dashboard
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="/Account/Logout">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="auth-buttons d-none d-lg-flex">
+                            <a class="btn btn-login" asp-area="Identity" asp-page="/Account/Login">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Accedi
+                            </a>
+                            <a class="btn btn-register" asp-area="Identity" asp-page="/Account/Register">
+                                <i class="bi bi-person-add me-2"></i>Registrati
+                            </a>
+                        </div>
+                    }
+                    
+                    <button class="navbar-toggler ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+                            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <div class="hamburger-lines">
+                            <span class="line line1"></span>
+                            <span class="line line2"></span>
+                            <span class="line line3"></span>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Book/Index" ? "active" : "")" 
+                               asp-area="" asp-page="/Book/Index">
+                                <i class="bi bi-house-door"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Privacy" ? "active" : "")" 
+                               asp-area="" asp-page="/Privacy">
+                                <i class="bi bi-shield-check"></i> Privacy
+                            </a>
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Users/Favorites" ? "active" : "")" 
+                                   asp-area="" asp-page="/Users/Favorites">
+                                    <i class="bi bi-heart-fill"></i> Preferiti
+                                </a>
+                            </li>
+                        }
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.StartsWith("/Admin/") == true ? "active" : "")" 
+                                   asp-area="" asp-page="/Admin/Dashboard">
+                                    <i class="bi bi-speedometer2"></i> Admin
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <!-- Mobile Auth Buttons -->
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <div class="auth-buttons d-flex d-lg-none flex-column">
+                            <a class="btn btn-login my-1" asp-area="Identity" asp-page="/Account/Login">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Accedi
+                            </a>
+                            <a class="btn btn-register my-1" asp-area="Identity" asp-page="/Account/Register">
+                                <i class="bi bi-person-add me-2"></i>Registrati
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main role="main" class="flex-grow-1">
+        <div class="container mt-4">
+            @RenderBody()
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-pattern"></div>
+        <div class="container position-relative">
+            <div class="row" data-aos="fade-up">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="footer-logo mb-3">
+                        <i class="bi bi-book"></i> 4Books
+                    </div>
+                    <p>La tua libreria digitale personale. Trova, salva e gestisci i tuoi libri preferiti in un unico posto.</p>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4 mb-md-0">
+                    <h5>Collegamenti rapidi</h5>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="/Book/Index">
+                                <i class="bi bi-chevron-right"></i> Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Privacy">
+                                <i class="bi bi-chevron-right"></i> Privacy
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="bi bi-chevron-right"></i> Chi siamo
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="bi bi-chevron-right"></i> Contatti
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4 mb-md-0">
+                    <h5>Categorie</h5>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="/Book/Results?category=fiction">
+                                <i class="bi bi-chevron-right"></i> Narrativa
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Book/Results?category=science">
+                                <i class="bi bi-chevron-right"></i> Scienza
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Book/Results?category=history">
+                                <i class="bi bi-chevron-right"></i> Storia
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Book/Results?category=biography">
+                                <i class="bi bi-chevron-right"></i> Biografie
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4 mb-md-0">
+                    <h5>Supporto</h5>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="#">
+                                <i class="bi bi-chevron-right"></i> FAQ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="bi bi-chevron-right"></i> Guida
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="bi bi-chevron-right"></i> Feedback
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright mt-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0">&copy; 2025 - 4Books - Tutti i diritti riservati</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <p class="mb-0">
+                            <a href="#" class="me-3">Termini di servizio</a>
+                            <a href="#">Cookie Policy</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Initialize AOS animation library
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                once: true
+            });
+        });
+        
+        // Page Loader
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.querySelector('.page-loader').classList.add('loaded');
+            }, 500);
+        });
+        
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                const htmlElement = document.documentElement;
+                const currentTheme = htmlElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                htmlElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            
+            // Set theme based on localStorage or system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            }
+        }
+        
+        // Navbar scroll behavior
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            const scrollPosition = window.scrollY;
+            
+            if (scrollPosition > 10) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            // Back to top button visibility
+            const backToTop = document.getElementById('backToTop');
+            if (scrollPosition > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+            
+            // Progress bar
+            const totalHeight = document.body.scrollHeight - window.innerHeight;
+            const progress = (scrollPosition / totalHeight) * 100;
+            document.querySelector('.progress-bar-indicator').style.width = progress + '%';
+        });
+        
+        // Back to top functionality
+        document.getElementById('backToTop').addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Bootstrap tooltip initialization
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,1608 @@
+﻿@page "{title?}"
+@model _4Books.Pages.Book.ResultsModel
+@{
+    ViewData["Title"] = "Risultati ricerca";
+}
+
+<div class="search-results-page">
+    @* Token per la validazione AJAX *@
+    @Html.AntiForgeryToken()
+    
+    <!-- Toast per notifica -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="favoriteToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header della pagina di risultati -->
+    <section class="results-header py-3 mb-4 fade-in">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="d-flex align-items-center">
+                        <div class="results-icon me-3">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <div>
+                            <h1 class="mb-0">Risultati di ricerca</h1>
+                            <p class="lead mb-0">per "<span class="search-term">@Model.SearchTitle</span>"</p>
+                            <div class="d-flex align-items-center mt-2">
+                                <span class="badge bg-primary rounded-pill">@Model.SearchResult.TotalItems libri trovati</span>
+                                <a href="/Book" class="btn btn-sm btn-outline-primary ms-3 rounded-pill">
+                                    <i class="bi bi-arrow-left me-1"></i> Nuova ricerca
+                                </a>
+                                <!-- Pulsante AI centralizzato -->
+                                <button id="global-ai-btn" type="button" class="btn btn-sm btn-outline-info ms-3 rounded-pill">
+                                    <i class="bi bi-magic me-1"></i> Analizza con AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-3 mt-lg-0">
+                    <div class="d-flex justify-content-lg-end align-items-center results-controls">
+                        <!-- Pulsanti di visualizzazione -->
+                        <div class="btn-group view-options me-2" role="group" aria-label="Opzioni visualizzazione">
+                            <button type="button" class="btn btn-sm btn-outline-secondary active" id="grid-view" data-bs-toggle="tooltip" title="Vista a griglia">
+                                <i class="bi bi-grid"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="list-view" data-bs-toggle="tooltip" title="Vista a lista">
+                                <i class="bi bi-list-ul"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Dropdown ordinamento -->
+                        <div class="dropdown me-2">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-sort-alpha-down me-1"></i>Ordina
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="sortDropdown">
+                                <li><a class="dropdown-item" href="#" id="sort-title-asc"><i class="bi bi-sort-alpha-down me-2"></i>Titolo (A-Z)</a></li>
+                                <li><a class="dropdown-item" href="#" id="sort-title-desc"><i class="bi bi-sort-alpha-up me-2"></i>Titolo (Z-A)</a></li>
+                                <li><a class="dropdown-item" href="#" id="sort-date-desc"><i class="bi bi-sort-numeric-down me-2"></i>Data (più recenti)</a></li>
+                                <li><a class="dropdown-item" href="#" id="sort-date-asc"><i class="bi bi-sort-numeric-up me-2"></i>Data (meno recenti)</a></li>
+                                <li><a class="dropdown-item" href="#" id="sort-rating-desc"><i class="bi bi-star-fill me-2"></i>Valutazione (Alta-Bassa)</a></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Dropdown per filtri -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-funnel me-1"></i>Filtra
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow-sm p-3" aria-labelledby="filterDropdown" style="min-width: 250px;">
+                                <h6 class="dropdown-header">Filtri</h6>
+                                <div class="mb-3">
+                                    <label for="filterLanguage" class="form-label">Lingua</label>
+                                    <select class="form-select form-select-sm" id="filterLanguage">
+                                        <option value="">Tutte le lingue</option>
+                                        <option value="it">Italiano</option>
+                                        <option value="en">Inglese</option>
+                                        <option value="fr">Francese</option>
+                                        <option value="de">Tedesco</option>
+                                        <option value="es">Spagnolo</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="filterRating" class="form-label">Valutazione minima</label>
+                                    <select class="form-select form-select-sm" id="filterRating">
+                                        <option value="0">Tutte le valutazioni</option>
+                                        <option value="4">4+ stelle</option>
+                                        <option value="3">3+ stelle</option>
+                                        <option value="2">2+ stelle</option>
+                                        <option value="1">1+ stelle</option>
+                                    </select>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-sm btn-primary" id="applyFilters">Applica filtri</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="resetFilters">Reimposta</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        @if (Model.SearchResult.Books.Count == 0)
+        {
+            <!-- Stato vuoto -->
+            <div class="empty-state text-center py-5 slide-up">
+                <div class="empty-icon mb-4">
+                    <i class="bi bi-journal-x"></i>
+                </div>
+                <h2 class="mb-3">Nessun risultato</h2>
+                <p class="text-muted mb-4">Non abbiamo trovato libri per "<strong>@Model.SearchTitle</strong>".<br>Prova con un altro termine di ricerca.</p>
+                <a href="/Book" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-search me-2"></i>Nuova ricerca
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Griglia risultati -->
+            <div class="row" id="results-container">
+                @foreach (var book in Model.SearchResult.Books)
+                {
+                    <div class="col-md-6 col-xl-4 mb-4 book-item slide-up" 
+                         data-title="@book.Title" 
+                         data-rating="@book.AverageRating" 
+                         data-language="@book.Language" 
+                         data-date="@book.PublishedDate"
+                         data-book-id="@book.Id">
+                        <div class="book-card card h-100 border-0 shadow-hover">
+                            <div class="row g-0 h-100">
+                                <div class="col-md-4 book-cover-col">
+                                    <div class="book-cover-wrapper">
+                                        @if (!string.IsNullOrEmpty(book.ThumbnailUrl))
+                                        {
+                                            <img src="@book.ThumbnailUrl" class="img-fluid book-cover" alt="@book.Title">
+                                        }
+                                        else
+                                        {
+                                            <div class="placeholder-cover">
+                                                <i class="bi bi-book"></i>
+                                                <span>No Cover</span>
+                                            </div>
+                                        }
+                                        
+                                        <div class="book-cover-overlay">
+                                            @if (!string.IsNullOrEmpty(book.InfoLink))
+                                            {
+                                                <a href="@book.InfoLink" target="_blank" class="btn btn-sm btn-light rounded-pill shadow-sm" title="Vedi su Google Books">
+                                                    <i class="bi bi-google me-1"></i>Visualizza
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                    
+                                    @if (book.Categories != null && book.Categories.Any())
+                                    {
+                                        <div class="book-category">
+                                            <span class="badge text-bg-accent">@book.Categories.First()</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title book-title">@book.Title</h5>
+                                        
+                                        @if (book.Authors != null && book.Authors.Any())
+                                        {
+                                            <p class="card-text book-authors">
+                                                <span class="text-muted">di</span> @string.Join(", ", book.Authors)
+                                            </p>
+                                        }
+                                        
+                                        <div class="book-meta">
+                                            <div class="meta-item">
+                                                @if (!string.IsNullOrEmpty(book.Publisher))
+                                                {
+                                                    <span><i class="bi bi-building text-secondary"></i> @book.Publisher</span>
+                                                }
+                                            </div>
+                                            <div class="meta-item">
+                                                @if (!string.IsNullOrEmpty(book.PublishedDate))
+                                                {
+                                                    <span><i class="bi bi-calendar text-secondary"></i> @book.PublishedDate</span>
+                                                }
+                                            </div>
+                                            <div class="meta-item">
+                                                @if (book.PageCount > 0)
+                                                {
+                                                    <span><i class="bi bi-file-earmark-text text-secondary"></i> @book.PageCount pagine</span>
+                                                }
+                                            </div>
+                                            <div class="meta-item">
+                                                @if (!string.IsNullOrEmpty(book.Language))
+                                                {
+                                                    <span><i class="bi bi-globe text-secondary"></i> @GetLanguageName(book.Language)</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Valutazione -->
+                                        @if (book.AverageRating > 0)
+                                        {
+                                            <div class="book-rating">
+                                                <div class="stars">
+                                                    @for (int i = 0; i < 5; i++)
+                                                    {
+                                                        if (i < Math.Floor(book.AverageRating))
+                                                        {
+                                                            <i class="bi bi-star-fill"></i>
+                                                        }
+                                                        else if (i < Math.Floor(book.AverageRating) + 0.5 && book.AverageRating % 1 >= 0.5)
+                                                        {
+                                                            <i class="bi bi-star-half"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi bi-star"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                                <div class="rating-text">
+                                                    <span class="rating-value">@book.AverageRating.ToString("0.0")</span>
+                                                    <span class="rating-count">(@book.RatingsCount recensioni)</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        
+                                        <!-- Container per le informazioni AI che verrà riempito dinamicamente -->
+                                        <div id="ai-info-container-@book.Id" class="ai-info-container mt-2"></div>
+                                        
+                                        <div class="book-actions mt-auto">
+                                            <!-- Pulsante per preferiti (manteniamo solo questo) -->
+                                            @if (User.Identity.IsAuthenticated)
+                                            {
+                                                <button type="button"
+                                                        class="toggle-favorite-btn btn btn-sm @(Model.FavoriteStatus.ContainsKey(book.Id) && Model.FavoriteStatus[book.Id] ? "btn-danger" : "btn-outline-danger") rounded-pill w-100"
+                                                        data-book-id="@book.Id"
+                                                        data-is-favorite="@(Model.FavoriteStatus.ContainsKey(book.Id) && Model.FavoriteStatus[book.Id] ? "true" : "false")"
+                                                        data-title="@Model.SearchTitle">
+                                                    <i class="bi @(Model.FavoriteStatus.ContainsKey(book.Id) && Model.FavoriteStatus[book.Id] ? "bi-heart-fill" : "bi-heart") me-1"></i>
+                                                    <span class="favorite-label">@(Model.FavoriteStatus.ContainsKey(book.Id) && Model.FavoriteStatus[book.Id] ? "Rimuovi" : "Preferiti")</span>
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal per selezionare il libro da analizzare -->
+<div class="modal fade" id="bookSelectionModal" tabindex="-1" aria-labelledby="bookSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookSelectionModalLabel">Seleziona un libro da analizzare</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group book-selection-list">
+                    @foreach (var book in Model.SearchResult.Books)
+                    {
+                        <button type="button" class="list-group-item list-group-item-action book-select-item d-flex align-items-center" 
+                                data-book-id="@book.Id" 
+                                data-title="@book.Title">
+                            <div class="book-select-thumbnail me-3">
+                                @if (!string.IsNullOrEmpty(book.ThumbnailUrl))
+                                {
+                                    <img src="@book.ThumbnailUrl" alt="@book.Title" width="40">
+                                }
+                                else
+                                {
+                                    <div class="no-thumb">
+                                        <i class="bi bi-book"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="book-select-info">
+                                <h6 class="mb-0">@book.Title</h6>
+                                <small class="text-muted">
+                                    @if (book.Authors != null && book.Authors.Any())
+                                    {
+                                        @string.Join(", ", book.Authors)
+                                    }
+                                    else
+                                    {
+                                        <span>Autore sconosciuto</span>
+                                    }
+                                </small>
+                            </div>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal per visualizzare le informazioni dettagliate -->
+<div class="modal fade" id="bookInfoModal" tabindex="-1" aria-labelledby="bookInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookInfoModalLabel">Informazioni sul libro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Caricamento...</span>
+                        </div>
+                        <p class="mt-2">Generazione informazioni in corso...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetLanguageName(string code)
+    {
+        return code switch
+        {
+            "it" => "Italiano",
+            "en" => "Inglese",
+            "fr" => "Francese",
+            "de" => "Tedesco",
+            "es" => "Spagnolo",
+            _ => code
+        };
+    }
+}
+
+<style>
+    /* Colori principali e variabili */
+    :root {
+        --accent-color-rgb: var(--accent-color-rgb, 213, 113, 73);
+        --accent-color: var(--accent-color, #d57149);
+    }
+    
+    /* Stili pagina risultati */
+    .search-results-page {
+        padding-bottom: 2rem;
+    }
+    
+    /* Header risultati - MODIFICATO: z-index ridotto */
+    .results-header {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        position: relative;
+        z-index: 50 !important; /* Ridotto da 1020/2000 a 50 */
+        pointer-events: none; /* Permette ai click di passare attraverso il container */
+    }
+    
+    .results-header > * {
+        pointer-events: auto; /* Ripristina gli eventi mouse per i figli dell'header */
+    }
+    
+    /* AGGIUNTO: correzioni z-index per modal e dropdown */
+    .modal {
+        z-index: 9999 !important;
+    }
+    
+    .modal-backdrop {
+        z-index: 9998 !important;
+    }
+    
+    .dropdown-menu {
+        z-index: 9997 !important;
+    }
+    
+    /* Miglioramento z-index e comportamento dropdown */
+    .dropdown-menu.show {
+        z-index: 10001 !important; /* Molto alto per assicurarsi sia sopra tutto */
+        display: block !important; /* Forza la visualizzazione */
+        pointer-events: auto !important; /* Assicura che gli eventi mouse funzionino */
+    }
+    
+    .dropdown-item {
+        cursor: pointer !important; /* Assicurati che il cursore sia pointer */
+        user-select: none; /* Impedisce la selezione del testo */
+    }
+    
+    /* Assicurati che i dropdown siano ben visibili */
+    .dropdown {
+        position: relative !important;
+    }
+    
+    /* Fix per gli input nei dropdown (filtri) */
+    .dropdown-menu input,
+    .dropdown-menu select,
+    .dropdown-menu button {
+        pointer-events: auto !important;
+        position: relative;
+        z-index: 10002 !important;
+    }
+    
+    /* Resto degli stili */
+    .results-icon {
+        width: 48px;
+        height: 48px;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .results-icon i {
+        font-size: 20px;
+        color: var(--primary-color);
+    }
+    
+    .search-term {
+        font-weight: 600;
+    }
+    
+    /* Stato vuoto */
+    .empty-state {
+        padding: 3rem 1rem;
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    
+    .empty-icon i {
+        font-size: 40px;
+        color: var(--primary-color);
+    }
+    
+    /* Card dei libri */
+    .book-card {
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        height: 100%;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .shadow-hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .shadow-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Copertina del libro */
+    .book-cover-col {
+        position: relative;
+    }
+    
+    .book-cover-wrapper {
+        height: 250px;
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--border-radius) 0 0 var(--border-radius);
+    }
+    
+    .book-cover {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .book-card:hover .book-cover {
+        transform: scale(1.05);
+    }
+    
+    .placeholder-cover {
+        height: 100%;
+        background: linear-gradient(135deg, #f5f7fa, #e4e7eb);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+    }
+    
+    .placeholder-cover i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .book-cover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .book-card:hover .book-cover-overlay {
+        opacity: 1;
+    }
+    
+    .book-category {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        max-width: 90%;
+    }
+    
+    .badge.text-bg-accent {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+        font-size: 0.75em;
+        border-radius: 50rem;
+    }
+    
+    /* Dettagli del libro */
+    .book-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        line-height: 1.4;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    
+    .book-authors {
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .book-meta {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .meta-item {
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+        color: var(--medium-text);
+    }
+    
+    .meta-item i {
+        margin-right: 5px;
+    }
+    
+    /* Valutazione */
+    .book-rating {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .stars {
+        color: #ffc107;
+        font-size: 0.9rem;
+        margin-right: 10px;
+    }
+    
+    .rating-text {
+        font-size: 0.85rem;
+        color: var(--medium-text);
+    }
+    
+    .rating-value {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+    
+    /* Stili per le informazioni AI */
+    .ai-info-container {
+        display: none;
+    }
+    
+    .ai-info-box {
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        border-left: 3px solid var(--accent-color);
+        margin-bottom: 1rem;
+    }
+    
+    .ai-info-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .ai-info-title {
+        display: flex;
+        align-items: center;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0;
+    }
+    
+    .ai-info-title i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+    
+    .ai-badge {
+        background-color: var(--accent-color);
+        color: white;
+        font-size: 0.6rem;
+        padding: 0.2em 0.5em;
+        border-radius: 50px;
+        font-weight: bold;
+    }
+    
+    .plot-text {
+        font-style: italic;
+        position: relative;
+        padding-left: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .plot-text::before {
+        content: '"';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 1.2rem;
+        color: var(--accent-color);
+    }
+    
+    .plot-text::after {
+        content: '"';
+        color: var(--accent-color);
+        margin-left: 0.2rem;
+    }
+    
+    .theme-tag {
+        display: inline-block;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        color: var(--primary-color);
+        padding: 0.25em 0.6em;
+        border-radius: 50px;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    /* NUOVO: Stile per i personaggi */
+    .character-item {
+        padding: 0.8rem;
+        border-radius: var(--border-radius);
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+        border-left: 3px solid var(--primary-color);
+        margin-bottom: 0.8rem;
+    }
+    
+    .character-item strong {
+        color: var(--primary-color);
+        font-size: 1.05rem;
+    }
+    
+    .similar-books-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .similar-books-list li {
+        padding: 0.5rem 0.5rem 0.5rem 1.8rem;
+        position: relative;
+        margin-bottom: 0.5rem;
+        background-color: rgba(var(--accent-color-rgb), 0.05);
+        border-radius: 5px;
+    }
+    
+    .similar-books-list li::before {
+        content: "•";
+        color: var(--accent-color);
+        display: inline-block;
+        position: absolute;
+        left: 0.7rem;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    /* Stile per la selezione libro */
+    .book-select-thumbnail {
+        width: 40px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        border-radius: var(--border-radius);
+    }
+    
+    .book-select-thumbnail img {
+        max-height: 100%;
+        object-fit: cover;
+    }
+    
+    .no-thumb {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--medium-text);
+    }
+    
+    .no-thumb i {
+        font-size: 1.5rem;
+    }
+    
+    .book-select-item {
+        padding: 0.8rem 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .book-select-item:hover {
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+    }
+    
+    .book-select-item.active {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        border-left: 3px solid var(--primary-color);
+    }
+    
+    /* Pulsante globale AI */
+    #global-ai-btn {
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    #global-ai-btn:hover {
+        background-color: rgba(var(--info-color-rgb), 0.2);
+    }
+    
+    #global-ai-btn i {
+        transition: transform 0.3s ease;
+    }
+    
+    #global-ai-btn:hover i {
+        transform: rotate(-10deg) scale(1.2);
+    }
+    
+    /* Pulsante di generazione info */
+    .generate-info-btn {
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .generate-info-btn:hover {
+        background-color: rgba(var(--info-color-rgb), 0.2);
+    }
+    
+    .generate-info-btn i {
+        transition: transform 0.3s ease;
+    }
+    
+    .generate-info-btn:hover i {
+        transform: rotate(-10deg) scale(1.2);
+    }
+    
+    /* Azioni sui libri */
+    .book-actions {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    /* Toast */
+    .toast {
+        opacity: 0.9;
+        border-radius: 10px;
+        z-index: 10000 !important;
+    }
+    
+    .toast.bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .toast.bg-danger {
+        background-color: #dc3545 !important;
+    }
+    
+    .toast.bg-warning {
+        background-color: #ffc107 !important;
+    }
+    
+    .toast.bg-info {
+        background-color: #17a2b8 !important;
+    }
+    
+    /* Pulsante preferiti */
+    .toggle-favorite-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .toggle-favorite-btn i {
+        transition: transform 0.3s ease;
+    }
+    
+    .toggle-favorite-btn:hover i {
+        transform: scale(1.3);
+    }
+    
+    /* Modal personalizzato */
+    .modal-content {
+        border-radius: var(--border-radius);
+        border: none;
+    }
+    
+    .modal-header {
+        border-bottom: 2px solid rgba(var(--primary-color-rgb), 0.1);
+    }
+    
+    .modal-footer {
+        border-top: 2px solid rgba(var(--primary-color-rgb), 0.1);
+    }
+    
+    /* Visualizzazione a lista */
+    #results-container.list-view .book-item {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+    
+    #results-container.list-view .book-card {
+        flex-direction: row;
+    }
+    
+    #results-container.list-view .book-cover-wrapper {
+        height: 100%;
+        max-width: 180px;
+    }
+    
+    #results-container.list-view .book-cover-col {
+        width: 180px;
+        max-width: 180px;
+    }
+    
+    #results-container.list-view .book-title {
+        font-size: 1.4rem;
+    }
+    
+    /* Controlli e filtri */
+    .results-controls .btn-group .btn.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: #fff;
+    }
+    
+    /* Animazioni */
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @@keyframes slideUp {
+        from { 
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to { 
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .slide-up {
+        animation: slideUp 0.8s ease forwards;
+    }
+    
+    /* Item staggering */
+    .book-item:nth-child(1) { animation-delay: 0.05s; }
+    .book-item:nth-child(2) { animation-delay: 0.10s; }
+    .book-item:nth-child(3) { animation-delay: 0.15s; }
+    .book-item:nth-child(4) { animation-delay: 0.20s; }
+    .book-item:nth-child(5) { animation-delay: 0.25s; }
+    .book-item:nth-child(6) { animation-delay: 0.30s; }
+    .book-item:nth-child(7) { animation-delay: 0.35s; }
+    .book-item:nth-child(8) { animation-delay: 0.40s; }
+    .book-item:nth-child(9) { animation-delay: 0.45s; }
+    .book-item:nth-child(10) { animation-delay: 0.50s; }
+    .book-item:nth-child(11) { animation-delay: 0.55s; }
+    .book-item:nth-child(12) { animation-delay: 0.60s; }
+    
+    /* Media queries */
+    @@media (max-width: 767.98px) {
+        .book-cover-wrapper {
+            height: 200px;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .results-controls {
+            justify-content: center !important;
+            margin-top: 1rem;
+        }
+        
+        .book-actions {
+            flex-direction: column;
+        }
+    }
+    
+    /* Fix definitivo per i dropdown */
+    .results-controls .dropdown {
+        position: static !important;
+    }
+    
+    .results-controls .dropdown-menu {
+        position: absolute !important;
+        z-index: 9997 !important;
+    }
+    
+    /* Aggiunta di un overlay per la sezione dei risultati quando i dropdown sono aperti */
+    .dropdown-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: transparent;
+        z-index: 1040;
+        display: none;
+    }
+    
+    body.dropdown-open .dropdown-backdrop {
+        display: block;
+    }
+    
+    /* Contenitore dei risultati */
+    #results-container {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // CORREZIONE: Interruzione della propagazione degli eventi sui dropdown
+            $('.dropdown-menu').on('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // CORREZIONE: Rimozione del backdrop che intercetta i click
+            $('.dropdown-backdrop').remove();
+            
+            // Correzione per il problema z-index dei modali
+            $(document).on('show.bs.modal', '.modal', function () {
+                var zIndex = 9999;
+                $(this).css('z-index', zIndex);
+                setTimeout(function() {
+                    $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+                }, 0);
+            });
+            
+            // Inizializzazione tooltip
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Miglioramento della gestione dei dropdown
+            $('.dropdown-toggle').on('click', function(e) {
+                e.stopPropagation();
+                var $this = $(this);
+                var $menu = $this.next('.dropdown-menu');
+                
+                setTimeout(function() {
+                    if ($menu.hasClass('show')) {
+                        // Se il menu viene mostrato, assicurati che sia sopra tutto il resto
+                        $menu.css('z-index', '10001');
+                    }
+                }, 10);
+            });
+            
+            // Cambio visualizzazione: griglia o lista
+            $('#grid-view').click(function() {
+                $(this).addClass('active');
+                $('#list-view').removeClass('active');
+                $('#results-container').removeClass('list-view');
+            });
+            
+            $('#list-view').click(function() {
+                $(this).addClass('active');
+                $('#grid-view').removeClass('active');
+                $('#results-container').addClass('list-view');
+            });
+            
+            // Riferimenti ai modal
+            var bookSelectionModal = new bootstrap.Modal(document.getElementById('bookSelectionModal'));
+            var bookInfoModal = new bootstrap.Modal(document.getElementById('bookInfoModal'));
+            
+            // Aggiorna la gestione del click sul pulsante AI globale
+            $('#global-ai-btn').click(function () {
+                // Prende il primo libro disponibile
+                const firstBook = $('.book-item').first();
+                if (firstBook.length) {
+                    const bookId = firstBook.data('book-id');
+                    const bookTitle = firstBook.data('title');
+
+                    // Aggiorna il titolo del modal con il titolo del libro
+                    $('#bookInfoModalLabel').text('Analisi di "' + bookTitle + '"');
+
+                    // Mostra loader nel modal
+                    $('#modalContent').html(`
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Caricamento...</span>
+                        </div>
+                        <p class="mt-2">Analisi del libro con intelligenza artificiale in corso...</p>
+                        <small class="text-muted">Potrebbe richiedere alcuni istanti</small>
+                    </div>
+                `);
+
+                    // Mostra il modal
+                    bookInfoModal.show();
+
+                    // Chiamata API per generare le informazioni
+                    generateBookInfo(bookId, bookTitle);
+                } else {
+                    alert('Nessun libro disponibile per l\'analisi');
+                }
+            });
+            
+            // NUOVA FUNZIONE: Mostra il modal con le informazioni
+            function showBookInfoModal(bookId, bookTitle) {
+                // Aggiorna il titolo del modal con il titolo del libro
+                $('#bookInfoModalLabel').text('Analisi di "' + bookTitle + '"');
+                $('#bookInfoModalLabel').data('title', bookTitle);
+                
+                // Mostra loader nel modal
+                $('#modalContent').html(`
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Caricamento...</span>
+                        </div>
+                        <p class="mt-2">Analisi del libro con intelligenza artificiale in corso...</p>
+                        <small class="text-muted">Potrebbe richiedere alcuni istanti</small>
+                    </div>
+                `);
+                
+                // Mostra il modal
+                bookInfoModal.show();
+                
+                // Chiamata API per generare le informazioni
+                generateBookInfo(bookId, bookTitle);
+            }
+
+            // Aggiorna il gestore di eventi per la selezione del libro
+            $('.book-select-item').click(function () {
+                const bookId = $(this).data('book-id');
+                const bookTitle = $(this).data('title');
+
+                // Nascondi il modal di selezione
+                bookSelectionModal.hide();
+
+                // Mostra il modal con le informazioni
+                setTimeout(function () {
+                    // Aggiorna il titolo del modal con il titolo del libro
+                    $('#bookInfoModalLabel').text('Analisi di "' + bookTitle + '"');
+
+                    // Mostra loader nel modal
+                    $('#modalContent').html(`
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Caricamento...</span>
+                        </div>
+                        <p class="mt-2">Analisi del libro con intelligenza artificiale in corso...</p>
+                        <small class="text-muted">Potrebbe richiedere alcuni istanti</small>
+                    </div>
+                `);
+
+                    // Mostra il modal
+                    bookInfoModal.show();
+
+                    // Chiamata API per generare le informazioni
+                    generateBookInfo(bookId, bookTitle);
+                }, 300);
+            });
+
+            // Sostituisci la funzione generateBookInfo con questa versione corretta
+            function generateBookInfo(bookId, bookTitle) {
+                // Mostra un loader con più informazioni
+                $('#modalContent').html(`
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Caricamento...</span>
+                    </div>
+                    <p class="mt-2">Analisi del libro "${bookTitle}" in corso...</p>
+                    <small class="text-muted">Sto consultando l'intelligenza artificiale Gemini per ottenere informazioni dettagliate. Questo processo potrebbe richiedere qualche istante.</small>
+                </div>
+            `);
+
+                // Chiamata AJAX per generare le info
+                $.ajax({
+                    url: '?handler=GenerateBookInfo',
+                    type: 'POST',
+                    data: {
+                        bookId: bookId,
+                        title: bookTitle
+                    },
+                    headers: {
+                        "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        // Log per debug
+                        console.log("Risposta API per libro:", bookTitle, result);
+
+                        if (result.success) {
+                            // Verifico se le informazioni sono predefinite o reali
+                            let isDefaultInfo = result.info.plot.includes("La trama di") &&
+                                result.info.plot.includes("trasporta i lettori") &&
+                                result.info.plot.includes("viaggio narrativo");
+
+                            // Formatta e mostra le informazioni nel modal
+                            let modalContent = `
+                            <div class="book-ai-info">
+                                <div class="section mb-4">
+                                    <h5 class="d-flex align-items-center">
+                                        <i class="bi bi-book me-2 text-primary"></i>
+                                        Trama
+                                    </h5>
+                                    <p class="plot-text">${result.info.plot}</p>
+                                </div>`;
+
+                            // Verifica se esistono i personaggi
+                            if (result.info.characters && result.info.characters.length > 0) {
+                                modalContent += `
+                                <div class="section mb-4">
+                                    <h5 class="d-flex align-items-center">
+                                        <i class="bi bi-people-fill me-2 text-primary"></i>
+                                        Personaggi Principali
+                                    </h5>
+                                    <div class="characters-container">`;
+
+                                // Aggiunge i personaggi
+                                result.info.characters.forEach(character => {
+                                    if (character.name) {
+                                        modalContent += `
+                                        <div class="character-item">
+                                            <strong>${character.name}</strong>: ${character.description || ""}
+                                        </div>`;
+                                    }
+                                });
+
+                                modalContent += `</div>
+                                </div>`;
+                            }
+
+                            modalContent += `
+                            <div class="section mb-4">
+                                <h5 class="d-flex align-items-center">
+                                    <i class="bi bi-tags me-2 text-primary"></i>
+                                    Temi
+                                </h5>
+                                <div class="themes-container">`;
+
+                            // Aggiunge i temi
+                            if (result.info.themes && result.info.themes.length > 0) {
+                                result.info.themes.forEach(theme => {
+                                    modalContent += `<span class="theme-tag">${theme}</span>`;
+                                });
+                            } else {
+                                modalContent += `<p>Informazioni sui temi non disponibili</p>`;
+                            }
+
+                            modalContent += `
+                                </div>
+                            </div>
+
+                            <div class="section mb-4">
+                                <h5 class="d-flex align-items-center">
+                                    <i class="bi bi-people me-2 text-primary"></i>
+                                    Pubblico ideale
+                                </h5>
+                                <p>${result.info.audience || "Informazione non disponibile"}</p>
+                            </div>
+
+                            <div class="section mb-4">
+                                <h5 class="d-flex align-items-center">
+                                    <i class="bi bi-lightbulb me-2 text-primary"></i>
+                                    Libri simili consigliati
+                                </h5>
+                                <ul class="similar-books-list">`;
+
+                            // Aggiunge i libri simili
+                            if (result.info.similarBooks && result.info.similarBooks.length > 0) {
+                                result.info.similarBooks.forEach(book => {
+                                    modalContent += `<li>${book}</li>`;
+                                });
+                            } else {
+                                modalContent += `<li>Nessun libro simile disponibile</li>`;
+                            }
+
+                            modalContent += `
+                                </ul>
+                            </div>`;
+
+                            // Aggiungi avviso se le informazioni sono predefinite
+                            if (isDefaultInfo) {
+                                modalContent += `
+                                <div class="alert alert-warning mt-3">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>Nota:</strong> Le informazioni mostrate sono generate automaticamente poiché non è stato possibile ottenere dettagli specifici per questo libro. Prova con un altro libro o riprova più tardi.
+                                </div>`;
+                            }
+
+                            modalContent += `
+                            <div class="small text-muted mt-4 d-flex align-items-center">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <div>Informazioni generate usando AI Gemini. Le risposte potrebbero non essere completamente accurate.</div>
+                            </div>
+
+                            <!-- Debug info (nascosto) -->
+                            <div class="mt-3 d-none" id="debug-info">
+                                <hr>
+                                <h6 class="text-muted">Debug Info</h6>
+                                <div class="bg-light p-2 rounded small">
+                                    <pre style="white-space: pre-wrap;">${JSON.stringify(result.info, null, 2)}</pre>
+                                </div>
+                                <div class="mt-2 text-end">
+                                    <button class="btn btn-sm btn-secondary" onclick="$('#debug-info').addClass('d-none')">Chiudi</button>
+                                </div>
+                            </div>
+
+                            <div class="text-end mt-2">
+                                <button class="btn btn-sm btn-link text-muted" onclick="$('#debug-info').removeClass('d-none')">Debug</button>
+                            </div>
+                        </div>`;
+
+                            // Aggiorna il contenuto del modal
+                            $('#modalContent').html(modalContent);
+
+                        } else {
+                            // Mostra messaggio di errore
+                            $('#modalContent').html(`
+                            <div class="alert alert-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Errore durante l'analisi del libro:</strong> ${result.error}
+                            </div>
+                            <p>Possibili cause:</p>
+                            <ul>
+                                <li>Problema di connessione con l'API Gemini</li>
+                                <li>Chiave API non configurata o scaduta</li>
+                                <li>Limite di richieste raggiunto</li>
+                            </ul>
+                            <div class="mt-3 text-center">
+                                <button type="button" class="btn btn-primary" onclick="generateBookInfo('${bookId}', '${bookTitle}')">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Riprova
+                                </button>
+                            </div>
+                        `);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // Log per debug
+                        console.error("Errore AJAX:", status, error, xhr);
+
+                        // Mostra messaggio di errore più dettagliato
+                        $('#modalContent').html(`
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Errore di connessione al server</strong>
+                        </div>
+                        <div class="mt-2">
+                            <p><strong>Dettagli tecnici:</strong> ${status} - ${error || 'Errore non specificato'}</p>
+                            <p><strong>Codice:</strong> ${xhr.status}</p>
+                            <p><strong>Risposta:</strong> ${xhr.responseText ? xhr.responseText.substring(0, 100) + '...' : 'Nessuna risposta'}</p>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <button type="button" class="btn btn-primary" onclick="generateBookInfo('${bookId}', '${bookTitle}')">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Riprova
+                            </button>
+                        </div>
+                    `);
+                    }
+                });
+            }
+            
+            // AGGIORNATO: Funzione per aggiornare la card del libro con le informazioni AI
+            function updateBookCardWithAI(bookId, aiInfo) {
+                // Seleziona il contenitore AI nella card del libro
+                var container = $(`#ai-info-container-${bookId}`);
+                
+                // Prepara il contenuto
+                var aiContent = `
+                    <div class="ai-info-box">
+                        <div class="ai-info-header">
+                            <h6 class="ai-info-title">
+                                <i class="bi bi-magic"></i>Analisi AI
+                            </h6>
+                            <span class="ai-badge">AI</span>
+                        </div>
+                        <div class="ai-content">
+                            <p class="plot-text mb-2">${aiInfo.plot.substring(0, 120)}${aiInfo.plot.length > 120 ? '...' : ''}</p>`;
+                
+                // AGGIUNTO: Anteprima personaggi se disponibili
+                if (aiInfo.characters && aiInfo.characters.length > 0) {
+                    aiContent += `<p class="small mb-2"><strong>Personaggi:</strong> ${aiInfo.characters.slice(0, 2).map(c => c.name).join(', ')}${aiInfo.characters.length > 2 ? '...' : ''}</p>`;
+                }
+                
+                aiContent += `<div class="themes-container mb-2">`;
+                
+                // Aggiungi fino a 3 temi
+                if (aiInfo.themes && aiInfo.themes.length > 0) {
+                    aiInfo.themes.slice(0, 3).forEach(theme => {
+                        aiContent += `<span class="theme-tag">${theme}</span>`;
+                    });
+                }
+                
+                aiContent += `    </div>
+                            <button class="btn btn-sm btn-outline-info w-100 view-more-btn" data-book-id="${bookId}">
+                                <i class="bi bi-eye me-1"></i>Vedi analisi completa
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Aggiorna il contenuto e mostra il contenitore
+                container.html(aiContent);
+                container.slideDown(300);
+                
+                // Aggiungi event listener al pulsante "Vedi analisi completa"
+                container.find('.view-more-btn').on('click', function() {
+                    const bookId = $(this).data('book-id');
+                    // Trova il titolo del libro nell'elemento parent
+                    const bookTitle = $(this).closest('.book-card').find('.book-title').text();
+                    showBookInfoModal(bookId, bookTitle);
+                });
+            }
+            
+            // Gestione preferiti
+            $('.toggle-favorite-btn').off('click').on('click', function() {  
+                const bookId = $(this).data('book-id');
+                const isFavorite = $(this).data('is-favorite') === 'true';
+                const title = $(this).data('title');
+                const button = $(this);
+                
+                // Disabilita il pulsante durante l'operazione
+                button.prop('disabled', true);
+                
+                // Feedback visivo immediato
+                if (isFavorite) {
+                    button.removeClass('btn-danger').addClass('btn-outline-danger');
+                    button.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                    button.find('.favorite-label').text('Preferiti');
+                } else {
+                    button.removeClass('btn-outline-danger').addClass('btn-danger');
+                    button.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                    button.find('.favorite-label').text('Rimuovi');
+                }
+                
+                $.ajax({
+                    url: '?handler=ToggleFavoriteAjax',  // CORRETTO: nome handler corretto
+                    type: 'POST',
+                    data: {
+                        bookId: bookId,
+                        title: title
+                    },
+                    headers: {
+                        "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        // Abilita il pulsante
+                        button.prop('disabled', false);
+                        
+                        if (result.success) {
+                            // IMPORTANTE: Aggiorna l'attributo data per mantenere lo stato corretto
+                            button.attr('data-is-favorite', result.isFavorite ? 'true' : 'false');
+                            
+                            // Mantieni l'aspetto del pulsante aggiornato dalla risposta
+                            if (result.isFavorite) {
+                                button.removeClass('btn-outline-danger').addClass('btn-danger');
+                                button.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                                button.find('.favorite-label').text('Rimuovi');
+                                showToast('success', 'Libro aggiunto ai preferiti!');
+                            } else {
+                                button.removeClass('btn-danger').addClass('btn-outline-danger');
+                                button.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                                button.find('.favorite-label').text('Preferiti');
+                                showToast('info', 'Libro rimosso dai preferiti');
+                            }
+                        } else {
+                            // In caso di errore, ripristina lo stato originale
+                            if (isFavorite) {
+                                button.removeClass('btn-outline-danger').addClass('btn-danger');
+                                button.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                                button.find('.favorite-label').text('Rimuovi');
+                            } else {
+                                button.removeClass('btn-danger').addClass('btn-outline-danger');
+                                button.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                                button.find('.favorite-label').text('Preferiti');
+                            }
+                            // Mostra messaggio di errore
+                            showToast('danger', result.message || 'Si è verificato un errore');
+                        }
+                    },
+                    error: function() {
+                        // Abilita il pulsante e mostra errore
+                        button.prop('disabled', false);
+                        
+                        // Ripristina lo stato originale
+                        if (isFavorite) {
+                            button.removeClass('btn-outline-danger').addClass('btn-danger');
+                            button.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                            button.find('.favorite-label').text('Rimuovi');
+                        } else {
+                            button.removeClass('btn-danger').addClass('btn-outline-danger');
+                            button.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                            button.find('.favorite-label').text('Preferiti');
+                        }
+                        
+                        showToast('danger', 'Errore di connessione');
+                    }
+                });
+            });
+            
+            // Funzione per mostrare un toast di notifica
+            function showToast(type, message) {
+                const toast = $('#favoriteToast');
+                
+                // Rimuovi le classi di colore esistenti
+                toast.removeClass('bg-success bg-danger bg-warning bg-info');
+                
+                // Aggiungi la classe di colore appropriata
+                toast.addClass('bg-' + type);
+                
+                // Imposta il messaggio
+                $('#toastMessage').text(message);
+                
+                // Mostra il toast
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+            }
+            
+            // CORREZIONE: Gestione diretta degli eventi per ordinamento senza propagazione
+            function sortItems(field, order) {
+                const items = $('.book-item').detach().toArray();
+                
+                items.sort(function(a, b) {
+                    let valueA, valueB;
+                    
+                    if (field === 'title') {
+                        valueA = $(a).data('title').toLowerCase();
+                        valueB = $(b).data('title').toLowerCase();
+                    } else if (field === 'date') {
+                        valueA = $(a).data('date') || '';
+                        valueB = $(b).data('date') || '';
+                    } else if (field === 'rating') {
+                        valueA = parseFloat($(a).data('rating')) || 0;
+                        valueB = parseFloat($(b).data('rating')) || 0;
+                    }
+                    
+                    if (order === 'asc') {
+                        return valueA > valueB ? 1 : -1;
+                    } else {
+                        return valueA < valueB ? 1 : -1;
+                    }
+                });
+                
+                $('#results-container').append(items);
+            }
+            
+            // Gestione diretta dei dropdown di ordinamento
+            $('#sort-title-asc').on('mousedown', function(e) {
+                e.preventDefault();
+                sortItems('title', 'asc');
+                $('.dropdown-menu.show').removeClass('show');
+                return false;
+            });
+            
+            $('#sort-title-desc').on('mousedown', function(e) {
+                e.preventDefault();
+                sortItems('title', 'desc');
+                $('.dropdown-menu.show').removeClass('show');
+                return false;
+            });
+            
+            $('#sort-date-desc').on('mousedown', function(e) {
+                e.preventDefault();
+                sortItems('date', 'desc');
+                $('.dropdown-menu.show').removeClass('show');
+                return false;
+            });
+            
+            $('#sort-date-asc').on('mousedown', function(e) {
+                e.preventDefault();
+                sortItems('date', 'asc');
+                $('.dropdown-menu.show').removeClass('show');
+                return false;
+            });
+            
+            $('#sort-rating-desc').on('mousedown', function(e) {
+                e.preventDefault();
+                sortItems('rating', 'desc');
+                $('.dropdown-menu.show').removeClass('show');
+                return false;
+            });
+            
+            // CORREZIONE: Funzioni di filtraggio con gestione diretta degli eventi
+            function applyFilters() {
+                const language = $('#filterLanguage').val();
+                const minRating = parseFloat($('#filterRating').val());
+                
+                // Mostra tutti gli elementi prima di iniziare a filtrare
+                $('.book-item').show();
+                
+                // Applica il filtro lingua
+                if (language) {
+                    $('.book-item').each(function() {
+                        if ($(this).data('language') !== language) {
+                            $(this).hide();
+                        }
+                    });
+                }
+                
+                // Applica il filtro rating
+                if (minRating > 0) {
+                    $('.book-item').each(function() {
+                        const rating = parseFloat($(this).data('rating')) || 0;
+                        if (rating < minRating) {
+                            $(this).hide();
+                        }
+                    });
+                }
+                
+                // Chiudi il dropdown
+                $('.dropdown-menu.show').removeClass('show');
+            }
+
+            function resetFilters() {
+                $('#filterLanguage').val('');
+                $('#filterRating').val('0');
+                $('.book-item').show();
+                
+                // Chiudi il dropdown
+                $('.dropdown-menu.show').removeClass('show');
+            }
+
+            // Usa eventi diretti mousedown invece di click
+            $('#applyFilters').on('mousedown', function(e) {
+                e.preventDefault();
+                applyFilters();
+                return false;
+            });
+
+            $('#resetFilters').on('mousedown', function(e) {
+                e.preventDefault();
+                resetFilters();
+                return false;
+            });
+        });
+    </script>
+}
+//gilloman
